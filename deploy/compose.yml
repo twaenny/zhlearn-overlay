@@ -29,8 +29,13 @@ services:
       #    walkthrough outside /usr/share/nginx/html means mount #1 stays :ro
       #    without monkey-patching the upstream tree to host a sub-mountpoint.
       - /var/lib/docker/volumes/coder-ops-home/_data/projects/platform/tools/zhlearn-overlay/walkthrough:/srv/walkthrough:ro
-      # 3. nginx site config (from this repo)
-      - /var/lib/docker/volumes/coder-ops-home/_data/projects/platform/tools/zhlearn-overlay/deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # 3. nginx site config (from this repo).
+      #    Mount the parent DIRECTORY (not the single file) — single-file
+      #    bind-mounts pin a specific inode, and most editors save by
+      #    atomic-replace (write tempfile → rename), which gives the new
+      #    file a different inode. The container would then keep serving
+      #    a stale snapshot until restart. Directory mount tracks the path.
+      - /var/lib/docker/volumes/coder-ops-home/_data/projects/platform/tools/zhlearn-overlay/deploy:/etc/nginx/conf.d:ro
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=ai-proxy"
