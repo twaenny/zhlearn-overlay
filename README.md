@@ -17,10 +17,29 @@ and adds two things at deploy time:
 
 ## Why a separate repo
 
-So the ZHlearn clone stays **byte-for-byte identical to `upstream/main`**.
-No local commits, no rebase choreography, no risk of accidentally
-pushing our preview tooling to Digital4Health. `git pull` on the
-ZHlearn clone is a fast-forward; `git pull` on this repo is independent.
+Two reasons:
+
+1. The ZHlearn clone stays **byte-for-byte identical to `upstream/main`**.
+   No local commits, no rebase choreography, no risk of accidentally
+   pushing our preview tooling to Digital4Health.
+2. **Open Design** (the `nexu-io/open-design` viewer, deployed at
+   `design.ai.srmedia.ch`) syncs design projects from `.od/projects/`.
+   Keeping the walkthrough wizard *outside* the ZHlearn project folder
+   means Open Design never picks it up as a design screen — reviewers
+   browsing the design portal see only the actual prototype pages, not
+   the walkthrough chrome.
+
+## Where this repo lives
+
+Same content, two remotes — pull from either:
+
+| Host | Clone URL |
+|---|---|
+| GitHub (public, primary) | `https://github.com/twaenny/zhlearn-overlay.git` |
+| Forgejo (in-platform mirror) | `https://git.ai.srmedia.ch/twaenny/zhlearn-overlay.git` |
+
+`git push` from the maintainer pushes to both. Anyone can clone from
+either side and run the deploy — they're the same commits.
 
 ## Layout
 
@@ -46,7 +65,8 @@ It also assumes the ZHlearn upstream is cloned at the sibling path:
 
 ```sh
 git clone https://github.com/Digital4Health/ZHlearn.git ~/projects/platform/tools/zhlearn
-git clone https://git.ai.srmedia.ch/twaenny/zhlearn-overlay.git ~/projects/platform/tools/zhlearn-overlay
+git clone https://github.com/twaenny/zhlearn-overlay.git  ~/projects/platform/tools/zhlearn-overlay
+# (or the Forgejo mirror: https://git.ai.srmedia.ch/twaenny/zhlearn-overlay.git)
 ```
 
 ## Deploy
