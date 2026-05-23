@@ -1,0 +1,47 @@
+# zhlearn-overlay — Docker Compose for the preview deployment.
+#
+# Serves the static ZHlearn prototype (read-only bind-mount of the
+# upstream clone) PLUS the reviewer-walkthrough overlay (bind-mount of
+# the overlay's `walkthrough/` directory layered onto the same nginx
+# root). The ZHlearn clone stays byte-for-byte identical to
+# upstream/main — none of this overlay's files live inside it.
+#
+# Layout assumed by the host bind paths:
+#   ~/projects/platform/tools/zhlearn/          (upstream Digital4Health/ZHlearn)
+#   ~/projects/platform/tools/zhlearn-overlay/  (this repo)
+#
+# Bind-mount sources use the HOST-side path of the coder-ops-home
+# Docker volume — the workspace's /home/coder/... paths don't exist on
+# the Docker daemon's filesystem. Same pattern as dev-pmaid's mounts.
+
+services:
+  app:
+    image: nginx:1.27-alpine
+    container_name: ai-zhlearn
+    restart: unless-stopped
+    networks: [ ai-proxy ]
+    volumes:
+      # 1. upstream prototype — strictly read-only, no diff against Digital4Health/ZHlearn.
+      #    Mounted at the nginx default root.
+      - /var/lib/docker/volumes/coder-ops-home/_data/projects/platform/tools/zhlearn:/usr/share/nginx/html:ro
+      # 2. walkthrough overlay — separate mount point. nginx.conf exposes it
+      #    at the /walkthrough/ URL via an `alias` directive. Keeping the
+      #    walkthrough outside /usr/share/nginx/html means mount #1 stays :ro
+      #    without monkey-patching the upstream tree to host a sub-mountpoint.
+      - /var/lib/docker/volumes/coder-ops-home/_data/projects/platform/tools/zhlearn-overlay/walkthrough:/srv/walkthrough:ro
+      # 3. nginx site config (from this repo)
+      - /var/lib/docker/volumes/coder-ops-home/_data/projects/platform/tools/zhlearn-overlay/deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ai-proxy"
+      - "traefik.http.routers.zhlearn.rule=Host(`zhlearn.ai.srmedia.ch`)"
+      - "traefik.http.routers.zhlearn.entrypoints=websecure"
+      - "traefik.http.routers.zhlearn.tls=true"
+      - "traefik.http.routers.zhlearn.tls.certresolver=le"
+      - "traefik.http.routers.zhlearn.tls.domains[0].main=ai.srmedia.ch"
+      - "traefik.http.routers.zhlearn.tls.domains[0].sans=*.ai.srmedia.ch"
+      - "traefik.http.services.zhlearn.loadbalancer.server.port=80"
+
+networks:
+  ai-proxy:
+    external: true
