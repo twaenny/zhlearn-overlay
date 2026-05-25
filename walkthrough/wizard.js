@@ -466,7 +466,14 @@
         renderPanel();
       });
     }
-    // Real step links navigate; nothing to bind (browser handles <a href>).
+
+    // Real step links navigate via the browser; mark the panel closed
+    // first so the next page boots with the panel collapsed (don't
+    // surprise the reviewer with an open overlay on the screen they
+    // just chose to look at).
+    for (const link of menu.querySelectorAll('a.wiz-menu__item')) {
+      link.addEventListener('click', () => writePanelState('closed'));
+    }
   }
 
   // ------- panel show/hide ---------------------------------------------
