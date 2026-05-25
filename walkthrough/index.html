@@ -27,10 +27,16 @@
   </header>
 
   <main class="wiz-main">
-    <aside class="wiz-narration" aria-label="Begleittext zum aktuellen Schritt">
-      <div id="wiz-narration-body">
-        <p class="wiz-loading">Lade DEMO-FLOW.md …</p>
+    <aside id="wiz-narration" class="wiz-narration" data-state="open" aria-label="Begleittext zum aktuellen Schritt">
+      <div class="wiz-narration__panel">
+        <div id="wiz-narration-body">
+          <p class="wiz-loading">Lade DEMO-FLOW.md …</p>
+        </div>
       </div>
+      <button id="wiz-narration-toggle" class="wiz-narration__toggle" type="button" aria-expanded="true" aria-label="Begleittext einklappen" aria-controls="wiz-narration-body">
+        <span class="wiz-narration__toggle-chev" aria-hidden="true">◀</span>
+        <span class="wiz-narration__toggle-label">Begleittext</span>
+      </button>
     </aside>
 
     <section class="wiz-stage" aria-label="Prototyp-Ansicht">
@@ -47,6 +53,8 @@
     </section>
   </main>
 
+  <div id="wiz-step-menu" class="wiz-menu" hidden role="menu" aria-label="Schrittauswahl"></div>
+
   <footer class="wiz-footer">
     <button id="wiz-prev" class="wiz-btn wiz-btn--secondary" aria-label="Vorheriger Schritt">
       <span aria-hidden="true">←</span> Zurück
@@ -56,15 +64,13 @@
         <span id="wiz-progress-bar" class="wiz-progress__bar" style="--p:0%"></span>
       </span>
       <span class="wiz-shortcuts" title="Tastenkürzel">
-        <kbd>←</kbd> / <kbd>→</kbd> blättern · <kbd>J</kbd> · <kbd>K</kbd> · <kbd>L</kbd> Schrittliste
+        <kbd>←</kbd> / <kbd>→</kbd> blättern · <kbd>J</kbd> · <kbd>K</kbd> · <kbd>L</kbd> Übersicht · <kbd>N</kbd> Begleittext
       </span>
     </div>
     <button id="wiz-next" class="wiz-btn wiz-btn--primary" aria-label="Nächster Schritt">
       Weiter <span aria-hidden="true">→</span>
     </button>
   </footer>
-
-  <div id="wiz-step-menu" class="wiz-menu" hidden role="menu" aria-label="Schrittauswahl"></div>
 
   <noscript>
     <p style="padding:24px;font-family:sans-serif">Dieser Walkthrough benötigt JavaScript. Sie können die Screens direkt über

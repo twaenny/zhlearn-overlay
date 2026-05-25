@@ -5,12 +5,19 @@
 // - loads the per-step HTML into an iframe; reviewers may click freely
 // - persists step position in localStorage; restores on reload
 // - syncs current step with the URL hash for shareable links
-// - 15 walkthrough steps + 2 roadmap-only steps (no iframe)
+// - journey groups (Marc, Annika, Silvia, Roadmap, …) are derived from
+//   `## ` H2 headings in DEMO-FLOW.md that have at least one `### Step`
+//   child — so upstream can add a new journey by adding a new H2 + steps
+//   to DEMO-FLOW.md, no wizard code change needed.
+// - the left narration column folds to a slim rail; the header step-list
+//   dropdown shows the journey groups as independent accordion toggles.
 
 (() => {
   'use strict';
 
   const STORAGE_KEY = 'zhlearn-walkthrough-step';
+  const NARRATION_STATE_KEY = 'zhlearn-walkthrough-narration';
+  const GROUP_STATES_KEY = 'zhlearn-walkthrough-groups';
   const DOC_URL = '../DEMO-FLOW.md';
   const REPO_BASE = '../'; // step files live one level above /walkthrough/
 
@@ -57,7 +64,40 @@
         isRoadmap: files.length === 0,
       });
     }
-    return steps;
+
+    const groups = parseGroups(md, steps);
+    return { steps, groups };
+  }
+
+  // Walk all `## ` H2 headings in order; an H2 becomes a "journey group"
+  // iff it has at least one `### Step` heading before the next H2.
+  // Group label is the H2 text minus its leading "N · " number prefix,
+  // with "Part M" → "Teil M" so the German wizard stays consistent.
+  function parseGroups(md, steps) {
+    const stepIdSet = new Set(steps.map(s => s.id));
+    const h2Re = /^## (.+)$/gm;
+    const matches = [...md.matchAll(h2Re)];
+    const groups = [];
+    for (let i = 0; i < matches.length; i++) {
+      const text = matches[i][1].trim();
+      const start = matches[i].index + matches[i][0].length;
+      const end = i + 1 < matches.length ? matches[i + 1].index : md.length;
+      const slice = md.slice(start, end);
+      const stepIds = [...slice.matchAll(/^### Step (\d+)/gm)]
+        .map(m => m[1])
+        .filter(id => stepIdSet.has(id));
+      if (!stepIds.length) continue;
+      groups.push({ label: groupLabel(text), stepIds });
+    }
+    return groups;
+  }
+
+  function groupLabel(raw) {
+    // "2 · Part 1 · Marc Steiner — …" → "Teil 1 · Marc Steiner — …"
+    const partMatch = raw.match(/^\d+\s*·\s*Part\s+(\d+)\s*·\s*(.+)$/i);
+    if (partMatch) return `Teil ${partMatch[1]} · ${partMatch[2]}`;
+    // Else strip leading "N · " number prefix if any.
+    return raw.replace(/^\d+\s*·\s*/, '');
   }
 
   function parseSections(body) {
@@ -135,71 +175,164 @@
     return out.join('\n');
   }
 
-  // ------- renderer -----------------------------------------------------
+  // ------- DOM refs -----------------------------------------------------
 
   const ui = {
-    narration: document.getElementById('wiz-narration-body'),
-    iframe:    document.getElementById('wiz-iframe'),
-    roadmap:   document.getElementById('wiz-roadmap-panel'),
-    fileName:  document.getElementById('wiz-file-name'),
-    fileTabs:  document.getElementById('wiz-file-tabs'),
-    openDirect:document.getElementById('wiz-open-direct'),
-    stepNow:   document.getElementById('wiz-step-now'),
-    stepTotal: document.getElementById('wiz-step-total'),
-    progress:  document.getElementById('wiz-progress-bar'),
-    prev:      document.getElementById('wiz-prev'),
-    next:      document.getElementById('wiz-next'),
-    listBtn:   document.getElementById('wiz-step-list'),
-    menu:      document.getElementById('wiz-step-menu'),
+    narration:     document.getElementById('wiz-narration'),
+    narrationBody: document.getElementById('wiz-narration-body'),
+    narrationToggle: document.getElementById('wiz-narration-toggle'),
+    iframe:        document.getElementById('wiz-iframe'),
+    roadmap:       document.getElementById('wiz-roadmap-panel'),
+    fileName:      document.getElementById('wiz-file-name'),
+    fileTabs:      document.getElementById('wiz-file-tabs'),
+    openDirect:    document.getElementById('wiz-open-direct'),
+    stepNow:       document.getElementById('wiz-step-now'),
+    stepTotal:     document.getElementById('wiz-step-total'),
+    progress:      document.getElementById('wiz-progress-bar'),
+    prev:          document.getElementById('wiz-prev'),
+    next:          document.getElementById('wiz-next'),
+    listBtn:       document.getElementById('wiz-step-list'),
+    menu:          document.getElementById('wiz-step-menu'),
   };
 
   let state = {
     steps: [],
+    groups: [],
     currentIndex: 0,
     activeFileByStep: {}, // for steps with multiple files: id → active filename
   };
 
+  // ------- persistence helpers -----------------------------------------
+
+  function readNarrationState() {
+    try { return localStorage.getItem(NARRATION_STATE_KEY) || 'open'; }
+    catch { return 'open'; }
+  }
+  function writeNarrationState(s) {
+    try { localStorage.setItem(NARRATION_STATE_KEY, s); } catch { /* private mode */ }
+  }
+  function readGroupStates() {
+    try { return JSON.parse(localStorage.getItem(GROUP_STATES_KEY) || '{}'); }
+    catch { return {}; }
+  }
+  function writeGroupStates(obj) {
+    try { localStorage.setItem(GROUP_STATES_KEY, JSON.stringify(obj)); }
+    catch { /* private mode */ }
+  }
+
+  // ------- left narration fold -----------------------------------------
+
+  function setNarrationState(next) {
+    ui.narration.dataset.state = next;
+    const isOpen = next === 'open';
+    ui.narrationToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    ui.narrationToggle.setAttribute(
+      'aria-label',
+      isOpen ? 'Begleittext einklappen' : 'Begleittext ausklappen'
+    );
+    writeNarrationState(next);
+  }
+  function toggleNarration() {
+    setNarrationState(ui.narration.dataset.state === 'open' ? 'collapsed' : 'open');
+  }
+
+  // ------- dropdown step menu (with foldable journey groups) -----------
+
+  function isGroupOpen(label, containsCurrent, groupStates) {
+    const explicit = groupStates[label];
+    if (explicit === 'open') return true;
+    if (explicit === 'closed') return false;
+    return containsCurrent;
+  }
+
   function buildStepMenu() {
-    const groups = [
-      { label: 'Teil 1 · Marc — interne Lernreise', range: [1, 4] },
-      { label: 'Teil 2 · Annika — externe Buchung', range: [5, 8] },
-      { label: 'Teil 3 · Silvia — Verwaltung', range: [9, 15] },
-      { label: 'Teil 4 · Roadmap (kein Screen)',   range: [16, 17] },
-    ];
+    const currentId = state.steps[state.currentIndex]?.id;
+    const groupStates = readGroupStates();
     const frag = document.createDocumentFragment();
-    for (const g of groups) {
-      const stepsInGroup = state.steps.filter(s => +s.id >= g.range[0] && +s.id <= g.range[1]);
+
+    for (const g of state.groups) {
+      const stepsInGroup = g.stepIds
+        .map(id => state.steps.find(s => s.id === id))
+        .filter(Boolean);
       if (!stepsInGroup.length) continue;
-      const header = document.createElement('div');
-      header.className = 'wiz-menu__group';
-      header.textContent = g.label;
-      frag.appendChild(header);
+
+      const containsCurrent = stepsInGroup.some(s => s.id === currentId);
+      const open = isGroupOpen(g.label, containsCurrent, groupStates);
+
+      const groupEl = document.createElement('div');
+      groupEl.className = 'wiz-menu__group';
+      groupEl.dataset.label = g.label;
+      groupEl.dataset.state = open ? 'open' : 'closed';
+
+      const header = document.createElement('button');
+      header.type = 'button';
+      header.className = 'wiz-menu__group-header';
+      header.setAttribute('aria-expanded', open ? 'true' : 'false');
+      header.innerHTML = `
+        <span class="wiz-menu__chev" aria-hidden="true">▸</span>
+        <span class="wiz-menu__group-label">${esc(g.label)}</span>
+        <span class="wiz-menu__group-count">${stepsInGroup.length}</span>
+      `;
+      header.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpenNow = groupEl.dataset.state === 'open';
+        const next = isOpenNow ? 'closed' : 'open';
+        groupEl.dataset.state = next;
+        header.setAttribute('aria-expanded', next === 'open' ? 'true' : 'false');
+        const states = readGroupStates();
+        states[g.label] = next;
+        writeGroupStates(states);
+      });
+      groupEl.appendChild(header);
+
+      const itemsEl = document.createElement('div');
+      itemsEl.className = 'wiz-menu__items';
       for (const s of stepsInGroup) {
         const btn = document.createElement('button');
         btn.className = 'wiz-menu__item';
         btn.type = 'button';
         btn.setAttribute('role', 'menuitem');
         btn.dataset.id = s.id;
+        const fileLabel = s.files.length
+          ? esc(s.files[0]) + (s.files.length > 1 ? ' + …' : '')
+          : '— Roadmap';
         btn.innerHTML = `
           <span class="wiz-menu__num">${s.id}.</span>
           <span class="wiz-menu__title">${esc(s.title)}</span>
-          <span class="wiz-menu__file">${s.files.length ? esc(s.files[0]) + (s.files.length > 1 ? ' + …' : '') : '— Roadmap'}</span>
+          <span class="wiz-menu__file">${fileLabel}</span>
         `;
         btn.addEventListener('click', () => { hideMenu(); goTo(s.id); });
-        frag.appendChild(btn);
+        itemsEl.appendChild(btn);
       }
+      groupEl.appendChild(itemsEl);
+      frag.appendChild(groupEl);
     }
+
     ui.menu.innerHTML = '';
     ui.menu.appendChild(frag);
   }
 
   function updateMenuCurrent() {
-    const id = state.steps[state.currentIndex].id;
+    const id = state.steps[state.currentIndex]?.id;
+    if (!id) return;
     [...ui.menu.querySelectorAll('.wiz-menu__item')].forEach(el => {
-      el.toggleAttribute('aria-current', el.dataset.id === id);
       if (el.dataset.id === id) el.setAttribute('aria-current', 'true');
       else el.removeAttribute('aria-current');
     });
+    // Auto-open the group containing the current step (unless user has
+    // explicitly closed it).
+    const groupStates = readGroupStates();
+    for (const groupEl of ui.menu.querySelectorAll('.wiz-menu__group')) {
+      const containsCurrent = !!groupEl.querySelector(`[data-id="${id}"]`);
+      if (!containsCurrent) continue;
+      const explicit = groupStates[groupEl.dataset.label];
+      if (explicit === 'closed') continue;
+      if (groupEl.dataset.state !== 'open') {
+        groupEl.dataset.state = 'open';
+        const hdr = groupEl.querySelector('.wiz-menu__group-header');
+        if (hdr) hdr.setAttribute('aria-expanded', 'true');
+      }
+    }
   }
 
   function hideMenu() {
@@ -219,6 +352,8 @@
     }
   }
 
+  // ------- step rendering ----------------------------------------------
+
   function renderStep() {
     const step = state.steps[state.currentIndex];
     if (!step) return;
@@ -230,7 +365,7 @@
     ui.progress.style.setProperty('--p', pct + '%');
 
     // narration
-    ui.narration.innerHTML = renderNarration(step);
+    ui.narrationBody.innerHTML = renderNarration(step);
 
     // stage: iframe (with optional file tabs) OR roadmap panel
     if (step.isRoadmap) {
@@ -357,6 +492,7 @@
     ui.prev.addEventListener('click', () => goTo(state.currentIndex - 1));
     ui.next.addEventListener('click', () => goTo(state.currentIndex + 1));
     ui.listBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
+    ui.narrationToggle.addEventListener('click', (e) => { e.stopPropagation(); toggleNarration(); });
     document.addEventListener('click', (e) => {
       if (!ui.menu.hidden && !ui.menu.contains(e.target) && e.target !== ui.listBtn) hideMenu();
     });
@@ -377,6 +513,9 @@
       } else if (e.key === 'l' || e.key === 'L') {
         toggleMenu();
         e.preventDefault();
+      } else if (e.key === 'n' || e.key === 'N') {
+        toggleNarration();
+        e.preventDefault();
       } else if (e.key === 'Escape') {
         if (!ui.menu.hidden) hideMenu();
       }
@@ -392,7 +531,7 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       md = await res.text();
     } catch (err) {
-      ui.narration.innerHTML = `
+      ui.narrationBody.innerHTML = `
         <h2>Walkthrough konnte nicht geladen werden</h2>
         <p>Der Begleittext liegt in <code>DEMO-FLOW.md</code> im Repo-Root.
         Fehler beim Laden: <code>${esc(String(err))}</code></p>
@@ -401,14 +540,13 @@
       return;
     }
 
-    state.steps = parseDemoFlow(md);
+    const parsed = parseDemoFlow(md);
+    state.steps = parsed.steps;
+    state.groups = parsed.groups;
     if (!state.steps.length) {
-      ui.narration.innerHTML = `<p>Keine Schritte in DEMO-FLOW.md gefunden.</p>`;
+      ui.narrationBody.innerHTML = `<p>Keine Schritte in DEMO-FLOW.md gefunden.</p>`;
       return;
     }
-
-    buildStepMenu();
-    attachHandlers();
 
     // Restore: URL hash wins; else localStorage; else step 1.
     const hashMatch = location.hash.match(/^#step-(\d+)$/);
@@ -422,6 +560,9 @@
       : 0;
     state.currentIndex = startIdx >= 0 ? startIdx : 0;
 
+    buildStepMenu();
+    setNarrationState(readNarrationState());
+    attachHandlers();
     renderStep();
   }
 
