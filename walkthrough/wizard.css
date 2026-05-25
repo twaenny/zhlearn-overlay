@@ -1,272 +1,228 @@
-/* ZHlearn Walkthrough — overlay chrome.
-   Consumes ../colors_and_type.css tokens. No external deps.
-   Visual posture per DESIGN.md §9: institutional, calm, sharp edges,
-   two-weight Inter, flat surfaces, achromatic chrome with one accent. */
+/* ZHlearn reviewer-walkthrough overlay — injected into every upstream
+   HTML page. All rules scoped under #wiz-root so nothing leaks into
+   upstream layout. Visual posture per DESIGN.md §9: institutional,
+   calm, sharp edges, two-weight Inter, flat surfaces, achromatic
+   chrome with one accent. */
 
-:root {
-  --wiz-rail: 1px solid var(--color-black-15);
-  --wiz-bg-app: var(--color-white);
-  --wiz-bg-panel: var(--color-white);
-  --wiz-bg-stage: var(--color-black-5, #f4f4f4);
-  --wiz-text: var(--color-text, #0d1117);
-  --wiz-text-soft: var(--color-text-soft, #4a4a4a);
-  --wiz-accent: var(--color-blue, #0070b4);
-  --wiz-accent-soft: var(--color-blue-soft, #d6e9f6);
-  --wiz-focus: var(--color-focus, #00b1e5);
-  --wiz-header-h: 56px;
-  --wiz-narration-w: 400px;
-  --wiz-narration-rail-w: 36px;
+#wiz-root {
+  --wiz-bg-panel: #ffffff;
+  --wiz-bg-soft: #f4f4f4;
+  --wiz-rail: 1px solid rgba(13, 17, 23, 0.12);
+  --wiz-text: #0d1117;
+  --wiz-text-soft: #4a4a4a;
+  --wiz-accent: #0070b4;
+  --wiz-accent-soft: #d6e9f6;
+  --wiz-accent-dark: #003e6e;
+  --wiz-focus: #00b1e5;
+  --wiz-shadow: 0 8px 32px rgba(13, 17, 23, 0.16);
+  --wiz-logo-size: 44px;
+  --wiz-panel-w: 400px;
+  --wiz-z: 2147483640;
 }
 
-* { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
-body {
-  font-family: var(--font-family-base, Inter, system-ui, sans-serif);
-  background: var(--wiz-bg-app);
-  color: var(--wiz-text);
-  display: grid;
-  grid-template-rows: var(--wiz-header-h) 1fr;
-  height: 100vh;
-  overflow: hidden;
+/* Reset for our own elements only — never touches the host page. */
+#wiz-root,
+#wiz-root *,
+#wiz-root *::before,
+#wiz-root *::after {
+  box-sizing: border-box;
 }
 
-/* ---------- header ---------- */
-.wiz-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  border-bottom: var(--wiz-rail);
+/* ---------- floating logo button ---------- */
+#wiz-logo {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: var(--wiz-logo-size);
+  height: var(--wiz-logo-size);
+  padding: 0;
+  margin: 0;
   background: var(--wiz-bg-panel);
-  gap: 16px;
-}
-.wiz-header__brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
-.wiz-logo { height: 28px; width: auto; flex: 0 0 auto; }
-.wiz-brand-text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
-.wiz-brand-title {
-  font-family: var(--font-family-black, Inter, sans-serif);
-  font-weight: 900;
-  font-size: 15px;
-  letter-spacing: -0.005em;
-}
-.wiz-brand-sub {
-  font-size: 12px;
-  color: var(--wiz-text-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.wiz-header__nav { display: flex; align-items: center; gap: 8px; }
-
-/* ---------- buttons ---------- */
-.wiz-btn {
-  font-family: var(--font-family-black, Inter, sans-serif);
-  font-weight: 900;
-  font-size: 13px;
-  line-height: 1;
-  padding: 9px 14px;
+  border: 1px solid rgba(13, 17, 23, 0.15);
   border-radius: 1px;
-  border: 1px solid transparent;
+  box-shadow: 0 2px 8px rgba(13, 17, 23, 0.10);
   cursor: pointer;
-  text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  transition: background-color 100ms, color 100ms, border-color 100ms;
+  justify-content: center;
+  z-index: var(--wiz-z);
+  transition: box-shadow 140ms ease-out, transform 140ms ease-out;
   -webkit-appearance: none;
 }
-.wiz-btn:focus-visible { outline: 2px solid var(--wiz-focus); outline-offset: 2px; }
-.wiz-btn--primary { background: var(--wiz-accent); color: var(--color-white); }
-.wiz-btn--primary:hover { background: var(--color-darkblue, #003e6e); }
-.wiz-btn--primary[disabled] { background: var(--color-black-25, #c0c0c0); cursor: not-allowed; }
-.wiz-btn--secondary {
-  background: var(--color-white);
-  color: var(--wiz-text);
-  border-color: var(--color-black-25, #c0c0c0);
+#wiz-logo:hover {
+  box-shadow: 0 4px 14px rgba(13, 17, 23, 0.16);
+  transform: translateY(-1px);
 }
-.wiz-btn--secondary:hover { border-color: var(--wiz-text); }
-.wiz-btn--secondary[disabled] { color: var(--color-black-25, #c0c0c0); border-color: var(--color-black-15); cursor: not-allowed; }
-.wiz-btn--ghost {
-  background: transparent;
-  color: var(--wiz-text);
-  border-color: transparent;
-  padding: 7px 10px;
-  font-size: 12px;
+#wiz-logo:focus-visible {
+  outline: 2px solid var(--wiz-focus);
+  outline-offset: 2px;
 }
-.wiz-btn--ghost:hover { background: var(--color-black-5, #f4f4f4); }
-.wiz-step-counter strong { font-family: var(--font-family-black, Inter, sans-serif); font-weight: 900; }
-.wiz-chev { font-size: 10px; margin-left: 4px; }
+#wiz-logo:active {
+  transform: translateY(0);
+}
+#wiz-logo img {
+  width: 24px;
+  height: auto;
+  display: block;
+  pointer-events: none;
+}
+#wiz-logo-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: var(--wiz-accent);
+  color: #ffffff;
+  border-radius: 9px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 10px;
+  line-height: 18px;
+  text-align: center;
+  letter-spacing: 0;
+  box-shadow: 0 0 0 2px var(--wiz-bg-panel);
+  pointer-events: none;
+}
+#wiz-logo-badge[hidden] { display: none; }
 
-/* ---------- main grid: narration | stage ---------- */
-.wiz-main {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  min-height: 0;
-}
-
-/* ---------- narration (foldable left column) ---------- */
-.wiz-narration {
-  display: flex;
-  height: 100%;
-  border-right: var(--wiz-rail);
+/* ---------- popover panel ---------- */
+#wiz-panel {
+  position: fixed;
+  bottom: calc(20px + var(--wiz-logo-size) + 12px);
+  left: 20px;
+  width: var(--wiz-panel-w);
+  max-width: calc(100vw - 32px);
+  max-height: 75vh;
   background: var(--wiz-bg-panel);
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-}
-.wiz-narration__panel {
-  flex: 0 0 var(--wiz-narration-w);
-  width: var(--wiz-narration-w);
-  height: 100%;
-  min-height: 0;
+  border: 1px solid rgba(13, 17, 23, 0.15);
+  border-radius: 1px;
+  box-shadow: var(--wiz-shadow);
+  z-index: var(--wiz-z);
   overflow-y: auto;
-  padding: 24px 24px 32px;
+  overflow-x: hidden;
+  font-family: 'Inter', system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.55;
-  transition: flex-basis 180ms ease-out, width 180ms ease-out, padding 180ms ease-out;
-}
-.wiz-narration[data-state="collapsed"] .wiz-narration__panel {
-  flex-basis: 0;
-  width: 0;
-  padding-left: 0;
-  padding-right: 0;
-  overflow: hidden;
-}
-.wiz-narration__toggle {
-  width: var(--wiz-narration-rail-w);
-  flex: 0 0 var(--wiz-narration-rail-w);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 14px 0 16px;
-  gap: 14px;
-  background: var(--wiz-bg-stage);
-  border: 0;
-  border-left: var(--wiz-rail);
-  cursor: pointer;
-  font: inherit;
   color: var(--wiz-text);
+  transform: translateY(8px);
+  opacity: 0;
+  transition: transform 160ms ease-out, opacity 160ms ease-out;
 }
-.wiz-narration__toggle:hover { background: var(--color-black-5, #f4f4f4); }
-.wiz-narration__toggle:focus-visible { outline: 2px solid var(--wiz-focus); outline-offset: -2px; }
-.wiz-narration[data-state="open"] .wiz-narration__toggle {
-  background: var(--wiz-bg-panel);
-  border-left: var(--wiz-rail);
+#wiz-panel[data-state="open"] {
+  transform: translateY(0);
+  opacity: 1;
 }
-.wiz-narration__toggle-chev {
-  font-size: 14px;
-  color: var(--wiz-text-soft);
-  transition: transform 180ms ease-out;
-}
-.wiz-narration[data-state="collapsed"] .wiz-narration__toggle-chev { transform: rotate(180deg); }
-.wiz-narration__toggle-label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 10.5px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--wiz-text-soft);
+#wiz-panel[hidden] { display: none; }
+
+#wiz-panel-body {
+  padding: 20px 22px 18px;
 }
 
-.wiz-narration h2 {
-  margin: 0 0 4px;
-  font-family: var(--font-family-black, Inter, sans-serif);
-  font-weight: 900;
-  font-size: 22px;
-  letter-spacing: -0.015em;
-  line-height: 1.15;
+/* ---------- narration ---------- */
+#wiz-root .wiz-narration {
+  display: block;
 }
-.wiz-narration .wiz-step-eyebrow {
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 11px;
+#wiz-root .wiz-step-eyebrow {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--wiz-text-soft);
   display: block;
   margin-bottom: 6px;
 }
-.wiz-narration .wiz-chips {
+#wiz-root .wiz-narration h2 {
+  margin: 0 0 6px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: -0.015em;
+  line-height: 1.18;
+  color: var(--wiz-text);
+}
+#wiz-root .wiz-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin: 14px 0 18px;
+  margin: 10px 0 14px;
 }
-.wiz-chip {
+#wiz-root .wiz-chip {
   display: inline-flex;
   align-items: center;
-  font-size: 11px;
-  font-family: var(--font-family-black, Inter, sans-serif);
+  font-size: 10.5px;
+  font-family: 'Inter', system-ui, sans-serif;
   font-weight: 900;
-  padding: 4px 9px;
-  border: 1px solid var(--color-black-15);
+  padding: 3px 8px;
+  border: 1px solid rgba(13, 17, 23, 0.12);
   border-radius: 999px;
-  background: var(--color-white);
+  background: var(--wiz-bg-panel);
   color: var(--wiz-text);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.wiz-chip--accent { background: var(--wiz-accent-soft); border-color: var(--wiz-accent-soft); color: var(--color-darkblue, #003e6e); }
-.wiz-chip--mono { font-family: var(--font-family-mono, ui-monospace, monospace); text-transform: none; letter-spacing: 0; }
-
-.wiz-narration section { margin-top: 22px; }
-.wiz-narration section h3 {
-  font-family: var(--font-family-black, Inter, sans-serif);
+#wiz-root .wiz-chip--accent {
+  background: var(--wiz-accent-soft);
+  border-color: var(--wiz-accent-soft);
+  color: var(--wiz-accent-dark);
+}
+#wiz-root .wiz-chip--mono {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+#wiz-root .wiz-narration section { margin-top: 16px; }
+#wiz-root .wiz-narration section h3 {
+  font-family: 'Inter', system-ui, sans-serif;
   font-weight: 900;
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--wiz-text-soft);
 }
-.wiz-narration p { margin: 0 0 10px; }
-.wiz-narration ul { padding-left: 18px; margin: 0; }
-.wiz-narration li { margin: 0 0 6px; }
-.wiz-narration code {
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 12.5px;
-  background: var(--color-black-5, #f4f4f4);
+#wiz-root .wiz-narration p { margin: 0 0 8px; }
+#wiz-root .wiz-narration ul { padding-left: 18px; margin: 0 0 8px; }
+#wiz-root .wiz-narration li { margin: 0 0 4px; }
+#wiz-root .wiz-narration code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 12px;
+  background: var(--wiz-bg-soft);
   padding: 1px 4px;
   border-radius: 2px;
 }
-.wiz-narration strong { font-family: var(--font-family-black, Inter, sans-serif); font-weight: 900; }
-.wiz-narration a { color: var(--wiz-accent); }
-
-.wiz-loading {
-  font-style: italic;
-  color: var(--wiz-text-soft);
+#wiz-root .wiz-narration strong {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 900;
 }
+#wiz-root .wiz-narration a { color: var(--wiz-accent); }
 
-/* ---------- stage ---------- */
-.wiz-stage {
-  display: grid;
-  grid-template-rows: 36px 1fr;
-  min-height: 0;
-  background: var(--wiz-bg-stage);
-}
-.wiz-stage__toolbar {
+/* ---------- file row ---------- */
+#wiz-root .wiz-file-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  border-bottom: var(--wiz-rail);
-  background: var(--wiz-bg-panel);
-  font-size: 12px;
-  color: var(--wiz-text-soft);
-  gap: 14px;
+  gap: 10px;
+  margin: 4px 0 14px;
+  padding: 6px 8px;
+  border: var(--wiz-rail);
+  background: var(--wiz-bg-soft);
+  font-size: 11px;
 }
-.wiz-file-label { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
-.wiz-file-label__prefix {
+#wiz-root .wiz-file-label { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+#wiz-root .wiz-file-label__prefix {
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  font-size: 10px;
+  font-size: 9.5px;
   color: var(--wiz-text-soft);
-  font-family: var(--font-family-mono, ui-monospace, monospace);
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
 }
-.wiz-file-label code {
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 12px;
-  background: var(--color-black-5, #f4f4f4);
+#wiz-root .wiz-file-label code {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 11px;
+  background: var(--wiz-bg-panel);
   padding: 2px 6px;
   border-radius: 2px;
   color: var(--wiz-text);
@@ -274,87 +230,54 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.wiz-file-tabs { display: inline-flex; gap: 6px; margin-left: 4px; }
-.wiz-file-tab {
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 11px;
+#wiz-root .wiz-file-tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+#wiz-root .wiz-file-tab {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 10.5px;
   padding: 3px 8px;
-  border: 1px solid var(--color-black-15);
+  border: 1px solid rgba(13, 17, 23, 0.15);
   border-radius: 2px;
-  background: transparent;
+  background: var(--wiz-bg-panel);
   color: var(--wiz-text-soft);
   cursor: pointer;
+  text-decoration: none;
 }
-.wiz-file-tab[aria-pressed="true"] {
+#wiz-root .wiz-file-tab[aria-pressed="true"] {
   background: var(--wiz-accent);
-  color: var(--color-white);
+  color: #ffffff;
   border-color: var(--wiz-accent);
 }
-.wiz-link { color: var(--wiz-accent); font-size: 12px; text-decoration: none; white-space: nowrap; }
-.wiz-link:hover { text-decoration: underline; }
+#wiz-root .wiz-link {
+  color: var(--wiz-accent);
+  font-size: 11px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+#wiz-root .wiz-link:hover { text-decoration: underline; }
 
-.wiz-iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
-  background: var(--color-white);
-}
-
-/* ---------- roadmap panel (used when a step has no iframe) ---------- */
-.wiz-roadmap {
-  padding: 40px 56px;
-  max-width: 920px;
-  overflow-y: auto;
-}
-.wiz-roadmap h2 {
-  font-family: var(--font-family-black, Inter, sans-serif);
-  font-weight: 900;
-  font-size: 28px;
-  letter-spacing: -0.02em;
-  margin: 0 0 16px;
-}
-.wiz-roadmap p, .wiz-roadmap li { font-size: 15px; line-height: 1.55; }
-.wiz-roadmap section { margin-top: 28px; }
-.wiz-roadmap h3 {
-  font-family: var(--font-family-black, Inter, sans-serif);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  margin: 0 0 10px;
-  color: var(--wiz-text-soft);
-}
-.wiz-roadmap__placeholder {
-  border: 1px solid var(--color-black-15);
-  padding: 24px;
-  background: var(--color-white);
-  font-size: 13px;
+/* ---------- roadmap placeholder inside panel ---------- */
+#wiz-root .wiz-roadmap__placeholder {
+  border: var(--wiz-rail);
+  padding: 14px 16px;
+  margin-top: 16px;
+  background: var(--wiz-bg-soft);
+  font-size: 12.5px;
   color: var(--wiz-text-soft);
 }
 
-/* ---------- step menu dropdown (foldable journey groups) ---------- */
-.wiz-menu {
-  position: fixed;
-  top: calc(var(--wiz-header-h) + 4px);
-  right: 20px;
-  width: 360px;
-  max-height: 70vh;
-  background: var(--color-white);
-  border: 1px solid var(--color-black-25, #c0c0c0);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  overflow-y: auto;
-  z-index: 30;
-  padding: 4px 0;
+/* ---------- step list (journey-group accordion) ---------- */
+#wiz-root .wiz-menu {
+  margin: 18px -22px -18px;
+  border-top: var(--wiz-rail);
 }
-
-.wiz-menu__group { border-top: var(--wiz-rail); }
-.wiz-menu__group:first-child { border-top: 0; }
-.wiz-menu__group-header {
+#wiz-root .wiz-menu__group { border-top: var(--wiz-rail); }
+#wiz-root .wiz-menu__group:first-child { border-top: 0; }
+#wiz-root .wiz-menu__group-header {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 10px 14px;
+  padding: 9px 22px;
   border: 0;
   background: transparent;
   font: inherit;
@@ -362,108 +285,99 @@ body {
   cursor: pointer;
   color: var(--wiz-text);
 }
-.wiz-menu__group-header:hover { background: var(--color-black-5, #f4f4f4); }
-.wiz-menu__group-header:focus-visible { outline: 2px solid var(--wiz-focus); outline-offset: -2px; }
-.wiz-menu__chev {
-  font-size: 10px;
+#wiz-root .wiz-menu__group-header:hover { background: var(--wiz-bg-soft); }
+#wiz-root .wiz-menu__group-header:focus-visible {
+  outline: 2px solid var(--wiz-focus);
+  outline-offset: -2px;
+}
+#wiz-root .wiz-menu__chev {
+  font-size: 9px;
   color: var(--wiz-text-soft);
   flex: 0 0 12px;
   transition: transform 120ms ease-out;
 }
-.wiz-menu__group[data-state="open"] .wiz-menu__chev { transform: rotate(90deg); }
-.wiz-menu__group-label {
+#wiz-root .wiz-menu__group[data-state="open"] .wiz-menu__chev { transform: rotate(90deg); }
+#wiz-root .wiz-menu__group-label {
   flex: 1;
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 10.5px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--wiz-text-soft);
   line-height: 1.3;
 }
-.wiz-menu__group-count {
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 10.5px;
+#wiz-root .wiz-menu__group-count {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 10px;
   color: var(--wiz-text-soft);
-  background: var(--color-white);
-  border: 1px solid var(--color-black-15);
+  background: var(--wiz-bg-panel);
+  border: var(--wiz-rail);
   padding: 1px 6px;
   border-radius: 2px;
 }
-
-.wiz-menu__items { display: none; padding-bottom: 4px; }
-.wiz-menu__group[data-state="open"] .wiz-menu__items { display: block; }
-
-/* Empty groups (no walkthrough screens yet) — show the label with a
-   Roadmap badge so the structure stays visible against the bid doc. */
-.wiz-menu__group--empty .wiz-menu__group-header { cursor: default; opacity: 0.7; }
-.wiz-menu__group--empty .wiz-menu__group-header:hover { background: transparent; }
-.wiz-menu__group--empty .wiz-menu__chev { color: var(--color-black-25, #c0c0c0); }
-.wiz-menu__group--empty .wiz-menu__group-count {
-  background: var(--wiz-bg-stage);
+#wiz-root .wiz-menu__items { display: none; padding-bottom: 6px; }
+#wiz-root .wiz-menu__group[data-state="open"] .wiz-menu__items { display: block; }
+#wiz-root .wiz-menu__group--empty .wiz-menu__group-header { cursor: default; opacity: 0.7; }
+#wiz-root .wiz-menu__group--empty .wiz-menu__group-header:hover { background: transparent; }
+#wiz-root .wiz-menu__group--empty .wiz-menu__chev { color: rgba(13, 17, 23, 0.25); }
+#wiz-root .wiz-menu__group--empty .wiz-menu__group-count {
+  background: var(--wiz-bg-soft);
   color: var(--wiz-text-soft);
   font-style: italic;
 }
-
-.wiz-menu__item {
+#wiz-root .wiz-menu__item {
   display: grid;
-  grid-template-columns: 24px 1fr;
+  grid-template-columns: 22px 1fr;
   align-items: baseline;
-  gap: 4px 8px;
+  gap: 3px 8px;
   width: 100%;
-  padding: 6px 14px 6px 32px;
+  padding: 6px 22px 6px 40px;
   border: 0;
   border-left: 2px solid transparent;
   background: transparent;
   font: inherit;
-  font-size: 12.5px;
+  font-size: 12px;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
   color: var(--wiz-text);
 }
-.wiz-menu__item:hover { background: var(--color-black-5, #f4f4f4); }
-.wiz-menu__item:focus-visible { outline: 2px solid var(--wiz-focus); outline-offset: -2px; }
-.wiz-menu__item[aria-current="true"] {
+#wiz-root .wiz-menu__item:hover { background: var(--wiz-bg-soft); }
+#wiz-root .wiz-menu__item:focus-visible {
+  outline: 2px solid var(--wiz-focus);
+  outline-offset: -2px;
+}
+#wiz-root .wiz-menu__item[aria-current="true"] {
   background: var(--wiz-accent-soft);
   border-left-color: var(--wiz-accent);
-  font-family: var(--font-family-black, Inter, sans-serif);
+  font-family: 'Inter', system-ui, sans-serif;
   font-weight: 900;
 }
-.wiz-menu__num {
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 11px;
+#wiz-root .wiz-menu__num {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 10.5px;
   color: var(--wiz-text-soft);
 }
-.wiz-menu__title { line-height: 1.3; }
-.wiz-menu__file {
+#wiz-root .wiz-menu__title { line-height: 1.3; }
+#wiz-root .wiz-menu__file {
   grid-column: 2;
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-  font-size: 10px;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 9.5px;
   color: var(--wiz-text-soft);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ---------- responsive: stack on narrow widths ---------- */
+/* ---------- narrow viewport ---------- */
 @media (max-width: 1100px) {
-  .wiz-main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
-  .wiz-narration {
-    border-right: 0;
-    border-bottom: var(--wiz-rail);
-    flex-direction: column;
+  #wiz-root {
+    --wiz-panel-w: calc(100vw - 24px);
   }
-  .wiz-narration__panel { flex: 0 0 auto; width: 100%; max-height: 240px; }
-  .wiz-narration[data-state="collapsed"] .wiz-narration__panel { max-height: 0; flex-basis: 0; }
-  .wiz-narration__toggle {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    padding: 6px 0;
-    border-left: 0;
-    border-top: var(--wiz-rail);
+  #wiz-logo { bottom: 12px; left: 12px; }
+  #wiz-panel {
+    bottom: calc(12px + var(--wiz-logo-size) + 10px);
+    left: 12px;
+    max-height: min(75vh, 600px);
   }
-  .wiz-narration__toggle-chev { transform: rotate(-90deg); }
-  .wiz-narration[data-state="collapsed"] .wiz-narration__toggle-chev { transform: rotate(90deg); }
-  .wiz-narration__toggle-label { writing-mode: horizontal-tb; transform: none; }
-  .wiz-menu { right: 8px; width: calc(100vw - 16px); max-width: 360px; }
 }

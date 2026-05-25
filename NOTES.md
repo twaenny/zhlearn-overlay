@@ -12,9 +12,13 @@ Three read-only bind-mounts:
 
 | Container path | Host source |
 |---|---|
-| `/usr/share/nginx/html/` | `…/zhlearn/` (upstream clone) |
-| `/usr/share/nginx/html/walkthrough/` | `…/zhlearn-overlay/walkthrough/` |
-| `/etc/nginx/conf.d/default.conf` | `…/zhlearn-overlay/deploy/nginx.conf` |
+| `/usr/share/nginx/html/` | `…/zhlearn/` (upstream clone, `:ro`) |
+| `/srv/walkthrough/` (aliased at `/walkthrough/` URL) | `…/zhlearn-overlay/walkthrough/` (`:ro`) |
+| `/etc/nginx/conf.d/` (whole dir, not single file) | `…/zhlearn-overlay/deploy/` (`:ro`) |
+
+Plus an `ai-zhlearn-autopull` sidecar (alpine/git) that runs
+`git pull --ff-only` against the upstream clone every 120s — new
+commits to `Digital4Health/ZHlearn:main` go live without manual pull.
 
 ## Bring up / tear down
 
@@ -31,8 +35,16 @@ Edits to either repo show up on the next page load — no container
 restart needed. nginx serves HTML with `Cache-Control: no-store` and
 CSS/JS with default short cache. Fonts/images are immutable + 30d cache.
 
-The walkthrough wizard fetches `../DEMO-FLOW.md` with `cache: 'no-cache'`,
-so prose updates upstream are picked up on the next reload too.
+Edits to `deploy/nginx.conf` need an nginx reload to take effect:
+
+```sh
+docker exec ai-zhlearn nginx -t && docker exec ai-zhlearn nginx -s reload
+```
+
+The walkthrough wizard is injected into every upstream HTML page via
+`sub_filter` in `nginx.conf` (alongside Bugherd). The wizard fetches
+`/DEMO-FLOW.md` with `cache: 'no-cache'`, so prose updates upstream
+are picked up on the next page reload too.
 
 ## Update workflow
 

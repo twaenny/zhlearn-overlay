@@ -2,64 +2,48 @@
 <html lang="de-CH">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=1440" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ZHlearn · Reviewer-Walkthrough</title>
-  <link rel="icon" href="../build/favicon-48.png" />
-  <link rel="stylesheet" href="../colors_and_type.css" />
-  <link rel="stylesheet" href="./wizard.css" />
+  <link rel="icon" href="/build/favicon-48.png" />
+  <style>
+    html, body { margin: 0; height: 100%; background: #f4f4f4; }
+    body {
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', system-ui, sans-serif; color: #4a4a4a;
+    }
+    .launcher { text-align: center; }
+    .launcher p { margin: 0; font-size: 13px; }
+    .launcher a { color: #0070b4; }
+  </style>
 </head>
 <body>
-  <header class="wiz-header">
-    <div class="wiz-header__brand">
-      <img class="wiz-logo" src="../assets/logo-ktzh.svg" alt="Kanton Zürich" />
-      <div class="wiz-brand-text">
-        <span class="wiz-brand-title">ZHlearn · Reviewer-Walkthrough</span>
-        <span class="wiz-brand-sub">Prototyp für die ZK09 Bewertung — Aus- und Weiterbildung</span>
-      </div>
-    </div>
-    <div class="wiz-header__nav">
-      <button id="wiz-step-list" class="wiz-btn wiz-btn--ghost" aria-haspopup="true" aria-expanded="false">
-        <span class="wiz-step-counter">Schritt <strong id="wiz-step-now">1</strong> von <span id="wiz-step-total">…</span></span>
-        <span class="wiz-chev">▾</span>
-      </button>
-      <a class="wiz-btn wiz-btn--ghost" href="../index.html" title="Zurück zur Übersicht aller Screens">Alle Screens</a>
-    </div>
-  </header>
-
-  <main class="wiz-main">
-    <aside id="wiz-narration" class="wiz-narration" data-state="open" aria-label="Begleittext zum aktuellen Schritt">
-      <div class="wiz-narration__panel">
-        <div id="wiz-narration-body">
-          <p class="wiz-loading">Lade DEMO-FLOW.md …</p>
-        </div>
-      </div>
-      <button id="wiz-narration-toggle" class="wiz-narration__toggle" type="button" aria-expanded="true" aria-label="Begleittext einklappen" aria-controls="wiz-narration-body">
-        <span class="wiz-narration__toggle-chev" aria-hidden="true">◀</span>
-        <span class="wiz-narration__toggle-label">Begleittext</span>
-      </button>
-    </aside>
-
-    <section class="wiz-stage" aria-label="Prototyp-Ansicht">
-      <div class="wiz-stage__toolbar">
-        <span class="wiz-file-label">
-          <span class="wiz-file-label__prefix">Datei</span>
-          <code id="wiz-file-name">—</code>
-        </span>
-        <div class="wiz-file-tabs" id="wiz-file-tabs" hidden></div>
-        <a id="wiz-open-direct" class="wiz-link" href="#" target="_blank" rel="noopener">In neuem Tab öffnen ↗</a>
-      </div>
-      <iframe id="wiz-iframe" class="wiz-iframe" title="Prototyp-Screen" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      <div id="wiz-roadmap-panel" class="wiz-roadmap" hidden></div>
-    </section>
-  </main>
-
-  <div id="wiz-step-menu" class="wiz-menu" hidden role="menu" aria-label="Schrittauswahl"></div>
-
-  <noscript>
-    <p style="padding:24px;font-family:sans-serif">Dieser Walkthrough benötigt JavaScript. Sie können die Screens direkt über
-      <a href="../index.html">die Launcher-Übersicht</a> öffnen.</p>
-  </noscript>
-
-  <script src="./wizard.js" defer></script>
+  <div class="launcher">
+    <p>Wird zum Walkthrough weitergeleitet…</p>
+    <p style="margin-top:8px"><a href="/index.html">Übersicht</a></p>
+  </div>
+  <script>
+    (async () => {
+      // Existing reviewer links: /walkthrough/, /walkthrough/#step-N.
+      // Resolve to the actual upstream HTML page that hosts the step.
+      const hash = location.hash.match(/^#step-(\d+)$/);
+      if (!hash) { location.replace('/index.html'); return; }
+      const wantedId = hash[1];
+      try {
+        const md = await fetch('/DEMO-FLOW.md', { cache: 'no-cache' }).then(r => r.text());
+        const headingRe = /^### Step (\d+)(?:\s*·\s*)?(.*?)$/gm;
+        for (const m of md.matchAll(headingRe)) {
+          if (m[1] !== wantedId) continue;
+          const files = [...m[2].matchAll(/`([^`]+\.html)`/g)].map(x => x[1]);
+          if (files.length) { location.replace('/' + files[0]); return; }
+          // Roadmap step (no HTML file): land on overview, panel will
+          // surface the step when the reviewer opens it.
+          location.replace('/index.html'); return;
+        }
+        location.replace('/index.html');
+      } catch {
+        location.replace('/index.html');
+      }
+    })();
+  </script>
 </body>
 </html>

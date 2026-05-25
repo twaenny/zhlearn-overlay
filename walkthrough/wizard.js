@@ -1,25 +1,26 @@
 // ZHlearn reviewer-walkthrough overlay.
 //
-// Implements the wizard contract from DEMO-FLOW.md §10:
-// - parses DEMO-FLOW.md at runtime (SSOT, no derived build artefact)
-// - loads the per-step HTML into an iframe; reviewers may click freely
-// - persists step position in localStorage; restores on reload
-// - syncs current step with the URL hash for shareable links
-// - journey groups (Marc, Annika, Silvia, Roadmap, …) are derived from
-//   `## ` H2 headings in DEMO-FLOW.md that have at least one `### Step`
-//   child — so upstream can add a new journey by adding a new H2 + steps
-//   to DEMO-FLOW.md, no wizard code change needed.
-// - the left narration column folds to a slim rail; the header step-list
-//   dropdown shows the journey groups as independent accordion toggles.
+// Injected (via nginx sub_filter) into every upstream HTML page. Renders
+// a small floating logo button (Next.js dev-tools idiom) at bottom-left;
+// clicking it pops a compact panel containing the step's narration and a
+// step-list. Navigation between steps is a real browser page navigation
+// (the step list items are <a href="/...">), so reviewers are always
+// looking at the actual upstream HTML page, not an iframe of it.
+//
+// SSOT is upstream DEMO-FLOW.md, parsed at runtime per §10.3 of that doc.
 
 (() => {
   'use strict';
 
-  const STORAGE_KEY = 'zhlearn-walkthrough-step';
-  const NARRATION_STATE_KEY = 'zhlearn-walkthrough-narration';
+  const PANEL_STATE_KEY = 'zhlearn-walkthrough-panel';
   const GROUP_STATES_KEY = 'zhlearn-walkthrough-groups';
-  const DOC_URL = '../DEMO-FLOW.md';
-  const REPO_BASE = '../'; // step files live one level above /walkthrough/
+  const OLD_NARRATION_KEY = 'zhlearn-walkthrough-narration';
+  const OLD_STEP_KEY      = 'zhlearn-walkthrough-step';
+  const DOC_URL = '/DEMO-FLOW.md';
+  const LOGO_URL = '/assets/logo-ktzh.svg';
+
+  // If a page injects the wizard twice (idempotency), bail.
+  if (document.getElementById('wiz-root')) return;
 
   // Walkthrough structure — mirrors the bid document's "Live-Demo
   // folgender Use Cases" list. Reorders + regroups steps regardless of
@@ -33,13 +34,8 @@
     { label: '5. Dashboard & Gamification',            stepIds: ['16', '17'] },
   ];
 
-  // Labels that the reviewer-step blocks consistently use. Anything else
-  // we encounter (Tone commitment, Governance commitment, …) is rendered
-  // verbatim — the parser stays generic on purpose.
   const META_LABELS = new Set(['Persona', 'Award lens']);
 
-  // German display labels for the four canonical reviewer sub-blocks.
-  // Falls through to the upstream label for anything else (roadmap steps).
   const LABEL_TRANSLATIONS = {
     'What you\'re looking at': 'Was Sie sehen',
     'Notable interactions': 'Interaktionen zum Ausprobieren',
@@ -47,7 +43,7 @@
     'Known limitations': 'Bekannte Grenzen des Prototyps',
   };
 
-  // ------- parser -------------------------------------------------------
+  // ------- parser (verbatim from prior wizard) --------------------------
 
   function parseDemoFlow(md) {
     const headingRe = /^### Step (\d+)(?:\s*·\s*)?(.*?)$/gm;
@@ -60,7 +56,6 @@
       const bodyStart = m.index + m[0].length;
       const bodyEnd = i + 1 < headings.length ? headings[i + 1].index : md.length;
       let body = md.slice(bodyStart, bodyEnd);
-      // Stop at the next H2 (`## `) — that's the next part of the doc.
       const h2 = body.search(/^## /m);
       if (h2 >= 0) body = body.slice(0, h2);
 
@@ -76,15 +71,10 @@
         isRoadmap: files.length === 0,
       });
     }
-
     const groups = parseGroups(md, steps);
     return { steps, groups };
   }
 
-  // Walk all `## ` H2 headings in order; an H2 becomes a "journey group"
-  // iff it has at least one `### Step` heading before the next H2.
-  // Group label is the H2 text minus its leading "N · " number prefix,
-  // with "Part M" → "Teil M" so the German wizard stays consistent.
   function parseGroups(md, steps) {
     const stepIdSet = new Set(steps.map(s => s.id));
     const h2Re = /^## (.+)$/gm;
@@ -105,10 +95,8 @@
   }
 
   function groupLabel(raw) {
-    // "2 · Part 1 · Marc Steiner — …" → "Teil 1 · Marc Steiner — …"
     const partMatch = raw.match(/^\d+\s*·\s*Part\s+(\d+)\s*·\s*(.+)$/i);
     if (partMatch) return `Teil ${partMatch[1]} · ${partMatch[2]}`;
-    // Else strip leading "N · " number prefix if any.
     return raw.replace(/^\d+\s*·\s*/, '');
   }
 
@@ -118,22 +106,15 @@
     let current = null;
     const flush = () => { if (current) { sections.push(current); current = null; } };
     for (const raw of lines) {
-      const line = raw;
-      // A label line is **Label** at start, optionally followed by `· inline text`.
-      // Tolerant: trailing whitespace is fine. Anything bold-mid-sentence stays
-      // inside the previous section because it doesn't start at column 0.
-      const labelMatch = line.match(/^\*\*([^*]+?)\*\*(?:\s*·\s*(.+))?\s*$/);
+      const labelMatch = raw.match(/^\*\*([^*]+?)\*\*(?:\s*·\s*(.+))?\s*$/);
       if (labelMatch) {
         flush();
         current = { label: labelMatch[1].trim(), inline: (labelMatch[2] || '').trim(), lines: [] };
         continue;
       }
-      if (current) {
-        current.lines.push(line);
-      }
+      if (current) current.lines.push(raw);
     }
     flush();
-    // Trim leading/trailing blank lines on each section body.
     for (const s of sections) {
       while (s.lines.length && !s.lines[0].trim()) s.lines.shift();
       while (s.lines.length && !s.lines[s.lines.length - 1].trim()) s.lines.pop();
@@ -150,21 +131,16 @@
 
   function inlineMd(text) {
     let s = esc(text);
-    // code spans before bold so we don't try to bold inside code
     s = s.replace(/`([^`]+)`/g, (_, c) => `<code>${c}</code>`);
     s = s.replace(/\*\*([^*]+?)\*\*/g, (_, c) => `<strong>${c}</strong>`);
     return s;
   }
 
   function renderBlock(lines) {
-    // Group consecutive bullet lines into a <ul>; consecutive non-bullet,
-    // non-blank lines into a <p>. Blank lines are paragraph separators.
     const out = [];
     let para = [];
     let bullets = [];
-    const flushPara = () => {
-      if (para.length) { out.push(`<p>${inlineMd(para.join(' '))}</p>`); para = []; }
-    };
+    const flushPara = () => { if (para.length) { out.push(`<p>${inlineMd(para.join(' '))}</p>`); para = []; } };
     const flushBullets = () => {
       if (bullets.length) {
         out.push(`<ul>${bullets.map(b => `<li>${inlineMd(b)}</li>`).join('')}</ul>`);
@@ -187,256 +163,81 @@
     return out.join('\n');
   }
 
-  // ------- DOM refs -----------------------------------------------------
+  // ------- persistence --------------------------------------------------
 
-  const ui = {
-    narration:     document.getElementById('wiz-narration'),
-    narrationBody: document.getElementById('wiz-narration-body'),
-    narrationToggle: document.getElementById('wiz-narration-toggle'),
-    iframe:        document.getElementById('wiz-iframe'),
-    roadmap:       document.getElementById('wiz-roadmap-panel'),
-    fileName:      document.getElementById('wiz-file-name'),
-    fileTabs:      document.getElementById('wiz-file-tabs'),
-    openDirect:    document.getElementById('wiz-open-direct'),
-    stepNow:       document.getElementById('wiz-step-now'),
-    stepTotal:     document.getElementById('wiz-step-total'),
-    listBtn:       document.getElementById('wiz-step-list'),
-    menu:          document.getElementById('wiz-step-menu'),
-  };
+  function readPanelState() {
+    try {
+      const v = localStorage.getItem(PANEL_STATE_KEY);
+      if (v === 'open' || v === 'closed') return v;
+      // one-time migration from the previous narration storage key
+      const old = localStorage.getItem(OLD_NARRATION_KEY);
+      if (old != null) {
+        const next = old === 'open' ? 'open' : 'closed';
+        localStorage.setItem(PANEL_STATE_KEY, next);
+        localStorage.removeItem(OLD_NARRATION_KEY);
+        return next;
+      }
+      return 'closed';
+    } catch { return 'closed'; }
+  }
+  function writePanelState(v) { try { localStorage.setItem(PANEL_STATE_KEY, v); } catch {} }
+  function readGroupStates() { try { return JSON.parse(localStorage.getItem(GROUP_STATES_KEY) || '{}'); } catch { return {}; } }
+  function writeGroupStates(o) { try { localStorage.setItem(GROUP_STATES_KEY, JSON.stringify(o)); } catch {} }
 
-  let state = {
+  // ------- state --------------------------------------------------------
+
+  const state = {
     steps: [],
     groups: [],
-    currentIndex: 0,
-    activeFileByStep: {}, // for steps with multiple files: id → active filename
+    currentStep: null,    // step matched to location.pathname (may be null)
+    roadmapView: null,    // when user clicked a roadmap step from the list
+    panelOpen: false,
+    ui: null,
   };
 
-  // ------- persistence helpers -----------------------------------------
-
-  function readNarrationState() {
-    try { return localStorage.getItem(NARRATION_STATE_KEY) || 'open'; }
-    catch { return 'open'; }
+  function currentFileName() {
+    return location.pathname.replace(/^\//, '');
   }
-  function writeNarrationState(s) {
-    try { localStorage.setItem(NARRATION_STATE_KEY, s); } catch { /* private mode */ }
-  }
-  function readGroupStates() {
-    try { return JSON.parse(localStorage.getItem(GROUP_STATES_KEY) || '{}'); }
-    catch { return {}; }
-  }
-  function writeGroupStates(obj) {
-    try { localStorage.setItem(GROUP_STATES_KEY, JSON.stringify(obj)); }
-    catch { /* private mode */ }
+  function findStepForPath(steps) {
+    const f = currentFileName();
+    if (!f) return null;
+    return steps.find(s => s.files.includes(f)) || null;
   }
 
-  // ------- left narration fold -----------------------------------------
+  // ------- DOM construction --------------------------------------------
 
-  function setNarrationState(next) {
-    ui.narration.dataset.state = next;
-    const isOpen = next === 'open';
-    ui.narrationToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    ui.narrationToggle.setAttribute(
-      'aria-label',
-      isOpen ? 'Begleittext einklappen' : 'Begleittext ausklappen'
-    );
-    writeNarrationState(next);
-  }
-  function toggleNarration() {
-    setNarrationState(ui.narration.dataset.state === 'open' ? 'collapsed' : 'open');
-  }
-
-  // ------- dropdown step menu (with foldable journey groups) -----------
-
-  function isGroupOpen(label, containsCurrent, groupStates) {
-    const explicit = groupStates[label];
-    if (explicit === 'open') return true;
-    if (explicit === 'closed') return false;
-    return containsCurrent;
-  }
-
-  function buildStepMenu() {
-    const currentId = state.steps[state.currentIndex]?.id;
-    const groupStates = readGroupStates();
-    const frag = document.createDocumentFragment();
-
-    for (const g of state.groups) {
-      const stepsInGroup = g.stepIds
-        .map(id => state.steps.find(s => s.id === id))
-        .filter(Boolean);
-      const isEmpty = stepsInGroup.length === 0;
-
-      const containsCurrent = stepsInGroup.some(s => s.id === currentId);
-      const open = !isEmpty && isGroupOpen(g.label, containsCurrent, groupStates);
-
-      const groupEl = document.createElement('div');
-      groupEl.className = 'wiz-menu__group' + (isEmpty ? ' wiz-menu__group--empty' : '');
-      groupEl.dataset.label = g.label;
-      groupEl.dataset.state = open ? 'open' : 'closed';
-
-      const header = document.createElement(isEmpty ? 'div' : 'button');
-      if (!isEmpty) header.type = 'button';
-      header.className = 'wiz-menu__group-header';
-      if (!isEmpty) header.setAttribute('aria-expanded', open ? 'true' : 'false');
-      const chev = isEmpty ? '○' : '▸';
-      const badge = isEmpty ? 'Roadmap' : `${stepsInGroup.length}`;
-      header.innerHTML = `
-        <span class="wiz-menu__chev" aria-hidden="true">${chev}</span>
-        <span class="wiz-menu__group-label">${esc(g.label)}</span>
-        <span class="wiz-menu__group-count">${badge}</span>
-      `;
-      if (!isEmpty) {
-        header.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const isOpenNow = groupEl.dataset.state === 'open';
-          const next = isOpenNow ? 'closed' : 'open';
-          groupEl.dataset.state = next;
-          header.setAttribute('aria-expanded', next === 'open' ? 'true' : 'false');
-          const states = readGroupStates();
-          states[g.label] = next;
-          writeGroupStates(states);
-        });
-      }
-      groupEl.appendChild(header);
-
-      if (!isEmpty) {
-        const itemsEl = document.createElement('div');
-        itemsEl.className = 'wiz-menu__items';
-        for (const s of stepsInGroup) {
-          const btn = document.createElement('button');
-          btn.className = 'wiz-menu__item';
-          btn.type = 'button';
-          btn.setAttribute('role', 'menuitem');
-          btn.dataset.id = s.id;
-          const pos = state.steps.indexOf(s) + 1;
-          const fileLabel = s.files.length
-            ? esc(s.files[0]) + (s.files.length > 1 ? ' + …' : '')
-            : '— Roadmap';
-          btn.innerHTML = `
-            <span class="wiz-menu__num">${pos}.</span>
-            <span class="wiz-menu__title">${esc(s.title)}</span>
-            <span class="wiz-menu__file">${fileLabel}</span>
-          `;
-          btn.addEventListener('click', () => { hideMenu(); goTo(s.id); });
-          itemsEl.appendChild(btn);
-        }
-        groupEl.appendChild(itemsEl);
-      }
-      frag.appendChild(groupEl);
-    }
-
-    ui.menu.innerHTML = '';
-    ui.menu.appendChild(frag);
+  function buildChrome() {
+    const root = document.createElement('div');
+    root.id = 'wiz-root';
+    root.innerHTML = `
+      <button id="wiz-logo" type="button" aria-label="Reviewer-Walkthrough öffnen" aria-expanded="false">
+        <img src="${esc(LOGO_URL)}" alt="" />
+        <span id="wiz-logo-badge" hidden></span>
+      </button>
+      <aside id="wiz-panel" hidden aria-label="Reviewer-Walkthrough">
+        <div id="wiz-panel-body"></div>
+      </aside>
+    `;
+    document.body.appendChild(root);
+    return {
+      root,
+      logo:  root.querySelector('#wiz-logo'),
+      badge: root.querySelector('#wiz-logo-badge'),
+      panel: root.querySelector('#wiz-panel'),
+      body:  root.querySelector('#wiz-panel-body'),
+    };
   }
 
-  function updateMenuCurrent() {
-    const id = state.steps[state.currentIndex]?.id;
-    if (!id) return;
-    [...ui.menu.querySelectorAll('.wiz-menu__item')].forEach(el => {
-      if (el.dataset.id === id) el.setAttribute('aria-current', 'true');
-      else el.removeAttribute('aria-current');
-    });
-    // Auto-open the group containing the current step (unless user has
-    // explicitly closed it).
-    const groupStates = readGroupStates();
-    for (const groupEl of ui.menu.querySelectorAll('.wiz-menu__group')) {
-      const containsCurrent = !!groupEl.querySelector(`[data-id="${id}"]`);
-      if (!containsCurrent) continue;
-      const explicit = groupStates[groupEl.dataset.label];
-      if (explicit === 'closed') continue;
-      if (groupEl.dataset.state !== 'open') {
-        groupEl.dataset.state = 'open';
-        const hdr = groupEl.querySelector('.wiz-menu__group-header');
-        if (hdr) hdr.setAttribute('aria-expanded', 'true');
-      }
-    }
+  // ------- rendering ----------------------------------------------------
+
+  function setBadge(text) {
+    if (!state.ui) return;
+    state.ui.badge.textContent = text || '';
+    state.ui.badge.hidden = !text;
   }
 
-  function hideMenu() {
-    ui.menu.hidden = true;
-    ui.listBtn.setAttribute('aria-expanded', 'false');
-  }
-
-  function toggleMenu() {
-    const open = !ui.menu.hidden;
-    if (open) hideMenu();
-    else {
-      ui.menu.hidden = false;
-      ui.listBtn.setAttribute('aria-expanded', 'true');
-      updateMenuCurrent();
-      const current = ui.menu.querySelector('[aria-current="true"]');
-      if (current) current.scrollIntoView({ block: 'nearest' });
-    }
-  }
-
-  // ------- step rendering ----------------------------------------------
-
-  function renderStep() {
-    const step = state.steps[state.currentIndex];
-    if (!step) return;
-
-    // header counter — position within the (possibly reordered) walkthrough
-    ui.stepNow.textContent = (state.currentIndex + 1);
-    ui.stepTotal.textContent = state.steps.length;
-
-    // narration
-    ui.narrationBody.innerHTML = renderNarration(step);
-
-    // stage: iframe (with optional file tabs) OR roadmap panel
-    if (step.isRoadmap) {
-      ui.iframe.hidden = true;
-      ui.iframe.removeAttribute('src');
-      ui.roadmap.hidden = false;
-      ui.roadmap.innerHTML = renderRoadmap(step);
-      ui.fileName.textContent = '— (kein Screen, Roadmap-Schritt)';
-      ui.fileTabs.hidden = true;
-      ui.fileTabs.innerHTML = '';
-      ui.openDirect.style.visibility = 'hidden';
-    } else {
-      ui.roadmap.hidden = true;
-      ui.iframe.hidden = false;
-      ui.openDirect.style.visibility = 'visible';
-
-      const activeFile = state.activeFileByStep[step.id] || step.files[0];
-      const iframeSrc = REPO_BASE + activeFile;
-      if (ui.iframe.dataset.src !== iframeSrc) {
-        ui.iframe.src = iframeSrc;
-        ui.iframe.dataset.src = iframeSrc;
-      }
-      ui.fileName.textContent = activeFile;
-      ui.openDirect.href = iframeSrc;
-
-      if (step.files.length > 1) {
-        ui.fileTabs.hidden = false;
-        ui.fileTabs.innerHTML = step.files.map(f => {
-          const pressed = f === activeFile ? 'true' : 'false';
-          return `<button class="wiz-file-tab" type="button" aria-pressed="${pressed}" data-file="${esc(f)}">${esc(f)}</button>`;
-        }).join('');
-        [...ui.fileTabs.querySelectorAll('.wiz-file-tab')].forEach(b => {
-          b.addEventListener('click', () => {
-            state.activeFileByStep[step.id] = b.dataset.file;
-            renderStep();
-          });
-        });
-      } else {
-        ui.fileTabs.hidden = true;
-        ui.fileTabs.innerHTML = '';
-      }
-    }
-
-    // persistence + URL hash
-    try { localStorage.setItem(STORAGE_KEY, step.id); } catch { /* private mode etc. */ }
-    if (location.hash !== '#step-' + step.id) {
-      history.replaceState(null, '', '#step-' + step.id);
-    }
-    document.title = `ZHlearn · Schritt ${step.id} — ${step.title}`;
-
-    updateMenuCurrent();
-  }
-
-  function renderNarration(step) {
+  function renderHeader(step, pos) {
     const meta = step.sections.filter(s => META_LABELS.has(s.label));
-    const body = step.sections.filter(s => !META_LABELS.has(s.label));
-
     const chips = [];
     const personaSec = meta.find(s => s.label === 'Persona');
     if (personaSec && personaSec.inline) {
@@ -444,28 +245,66 @@
     }
     const awardSec = meta.find(s => s.label === 'Award lens');
     if (awardSec && awardSec.inline) {
-      // Award lens has multiple `·`-separated facets — split into chips.
       for (const facet of awardSec.inline.split(/\s+·\s+/)) {
         chips.push(`<span class="wiz-chip wiz-chip--mono">${inlineMd(facet.trim())}</span>`);
       }
     }
-
-    const sectionsHtml = body.map(s => {
-      const heading = LABEL_TRANSLATIONS[s.label] || s.label;
-      const block = renderBlock(s.lines);
-      const inline = s.inline ? `<p>${inlineMd(s.inline)}</p>` : '';
-      return `<section><h3>${esc(heading)}</h3>${inline}${block}</section>`;
-    }).join('');
-
     return `
       <span class="wiz-step-eyebrow">Schritt ${esc(step.id)} von ${state.steps.length}</span>
       <h2>${esc(step.title)}</h2>
       <div class="wiz-chips">${chips.join('')}</div>
-      ${sectionsHtml}
     `;
   }
 
-  function renderRoadmap(step) {
+  function renderFileRow(step) {
+    if (step.files.length <= 1) {
+      if (!step.files.length) return '';
+      const f = step.files[0];
+      return `
+        <div class="wiz-file-row">
+          <span class="wiz-file-label">
+            <span class="wiz-file-label__prefix">Datei</span>
+            <code>${esc(f)}</code>
+          </span>
+          <a class="wiz-link" href="/${esc(f)}" target="_blank" rel="noopener">In neuem Tab öffnen ↗</a>
+        </div>
+      `;
+    }
+    const activeFile = currentFileName();
+    const tabs = step.files.map(f => {
+      const pressed = f === activeFile ? 'true' : 'false';
+      return `<a class="wiz-file-tab" aria-pressed="${pressed}" href="/${esc(f)}">${esc(f)}</a>`;
+    }).join('');
+    const openLink = activeFile && step.files.includes(activeFile) ? activeFile : step.files[0];
+    return `
+      <div class="wiz-file-row">
+        <div class="wiz-file-tabs">${tabs}</div>
+        <a class="wiz-link" href="/${esc(openLink)}" target="_blank" rel="noopener">In neuem Tab öffnen ↗</a>
+      </div>
+    `;
+  }
+
+  function renderNarrationSections(step) {
+    const body = step.sections.filter(s => !META_LABELS.has(s.label));
+    return body.map(s => {
+      const heading = LABEL_TRANSLATIONS[s.label] || s.label;
+      const inline = s.inline ? `<p>${inlineMd(s.inline)}</p>` : '';
+      return `<section><h3>${esc(heading)}</h3>${inline}${renderBlock(s.lines)}</section>`;
+    }).join('');
+  }
+
+  function renderStepBody(step) {
+    const pos = state.steps.indexOf(step) + 1;
+    return `
+      <div class="wiz-narration">
+        ${renderHeader(step, pos)}
+        ${renderFileRow(step)}
+        ${renderNarrationSections(step)}
+      </div>
+    `;
+  }
+
+  function renderRoadmapBody(step) {
     const body = step.sections.filter(s => !META_LABELS.has(s.label));
     const meta = step.sections.filter(s => META_LABELS.has(s.label));
     const chips = meta.map(s => `<span class="wiz-chip wiz-chip--mono">${inlineMd(s.label)}: ${inlineMd(s.inline || '—')}</span>`).join(' ');
@@ -474,62 +313,153 @@
       return `<section><h3>${esc(heading)}</h3>${s.inline ? `<p>${inlineMd(s.inline)}</p>` : ''}${renderBlock(s.lines)}</section>`;
     }).join('');
     return `
-      <h2>${esc(step.title)}</h2>
-      <div class="wiz-chips">${chips}</div>
-      ${sectionsHtml}
-      <div class="wiz-roadmap__placeholder">
-        Für diesen Schritt existiert noch kein Screen — die Surfaces sind durch
-        offene Designentscheidungen blockiert (siehe <code>OPEN-QUESTIONS.md</code>).
-        Der Walkthrough nennt sie bewusst, damit Sie wissen, dass die Roadmap-Punkte
-        nicht vergessen sind.
+      <div class="wiz-narration wiz-narration--roadmap">
+        <span class="wiz-step-eyebrow">Roadmap-Schritt — kein Screen</span>
+        <h2>${esc(step.title)}</h2>
+        <div class="wiz-chips">${chips}</div>
+        ${sectionsHtml}
+        <div class="wiz-roadmap__placeholder">
+          Für diesen Schritt existiert noch kein Screen — die Surfaces sind durch
+          offene Designentscheidungen blockiert (siehe <code>OPEN-QUESTIONS.md</code>).
+          Der Walkthrough nennt sie bewusst, damit Sie wissen, dass die Roadmap-Punkte
+          nicht vergessen sind.
+        </div>
       </div>
     `;
   }
 
-  // ------- navigation ---------------------------------------------------
-
-  function goTo(idOrIndex) {
-    let idx;
-    if (typeof idOrIndex === 'number') idx = idOrIndex;
-    else idx = state.steps.findIndex(s => s.id === String(idOrIndex));
-    if (idx < 0 || idx >= state.steps.length) return;
-    state.currentIndex = idx;
-    renderStep();
+  function renderEmptyBody() {
+    return `
+      <div class="wiz-narration">
+        <span class="wiz-step-eyebrow">Reviewer-Walkthrough</span>
+        <h2>Übersicht — alle Screens</h2>
+        <p>Wählen Sie einen Schritt aus der Liste unten, um direkt zum
+        passenden Prototyp-Screen zu springen.</p>
+      </div>
+    `;
   }
 
-  function attachHandlers() {
-    ui.listBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
-    ui.narrationToggle.addEventListener('click', (e) => { e.stopPropagation(); toggleNarration(); });
-    document.addEventListener('click', (e) => {
-      if (!ui.menu.hidden && !ui.menu.contains(e.target) && e.target !== ui.listBtn) hideMenu();
-    });
-    window.addEventListener('hashchange', () => {
-      const m = location.hash.match(/^#step-(\d+)$/);
-      if (m) goTo(m[1]);
-    });
-    window.addEventListener('keydown', (e) => {
-      // Ignore typing inside form fields (none today, but cheap to guard).
-      const tag = (e.target && e.target.tagName) || '';
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-      if (e.key === 'ArrowRight' || e.key === 'j' || e.key === 'J') {
-        if (state.currentIndex < state.steps.length - 1) goTo(state.currentIndex + 1);
-        e.preventDefault();
-      } else if (e.key === 'ArrowLeft' || e.key === 'k' || e.key === 'K') {
-        if (state.currentIndex > 0) goTo(state.currentIndex - 1);
-        e.preventDefault();
-      } else if (e.key === 'l' || e.key === 'L') {
-        toggleMenu();
-        e.preventDefault();
-      } else if (e.key === 'n' || e.key === 'N') {
-        toggleNarration();
-        e.preventDefault();
-      } else if (e.key === 'Escape') {
-        if (!ui.menu.hidden) hideMenu();
+  function isGroupOpen(label, containsCurrent, groupStates) {
+    const explicit = groupStates[label];
+    if (explicit === 'open') return true;
+    if (explicit === 'closed') return false;
+    return containsCurrent;
+  }
+
+  function renderStepList() {
+    const currentId = state.roadmapView?.id || state.currentStep?.id;
+    const groupStates = readGroupStates();
+    let html = '<div class="wiz-menu">';
+    for (const g of state.groups) {
+      const stepsInGroup = g.stepIds
+        .map(id => state.steps.find(s => s.id === id))
+        .filter(Boolean);
+      const isEmpty = stepsInGroup.length === 0;
+      const containsCurrent = stepsInGroup.some(s => s.id === currentId);
+      const open = !isEmpty && isGroupOpen(g.label, containsCurrent, groupStates);
+
+      const chev = isEmpty ? '○' : '▸';
+      const badge = isEmpty ? 'Roadmap' : `${stepsInGroup.length}`;
+      const headerTag = isEmpty ? 'div' : 'button';
+      const headerAttrs = isEmpty
+        ? ''
+        : `type="button" aria-expanded="${open ? 'true' : 'false'}"`;
+
+      html += `<div class="wiz-menu__group${isEmpty ? ' wiz-menu__group--empty' : ''}" data-label="${esc(g.label)}" data-state="${open ? 'open' : 'closed'}">`;
+      html += `<${headerTag} class="wiz-menu__group-header" ${headerAttrs}>
+        <span class="wiz-menu__chev" aria-hidden="true">${chev}</span>
+        <span class="wiz-menu__group-label">${esc(g.label)}</span>
+        <span class="wiz-menu__group-count">${badge}</span>
+      </${headerTag}>`;
+
+      if (!isEmpty) {
+        html += `<div class="wiz-menu__items">`;
+        for (const s of stepsInGroup) {
+          const pos = state.steps.indexOf(s) + 1;
+          const fileLabel = s.files.length
+            ? esc(s.files[0]) + (s.files.length > 1 ? ' + …' : '')
+            : '— Roadmap';
+          const isCurrent = s.id === currentId ? ' aria-current="true"' : '';
+          if (s.isRoadmap) {
+            html += `<button class="wiz-menu__item wiz-menu__item--roadmap" type="button" data-id="${esc(s.id)}"${isCurrent}>
+              <span class="wiz-menu__num">${pos}.</span>
+              <span class="wiz-menu__title">${esc(s.title)}</span>
+              <span class="wiz-menu__file">${fileLabel}</span>
+            </button>`;
+          } else {
+            html += `<a class="wiz-menu__item" href="/${esc(s.files[0])}" data-id="${esc(s.id)}"${isCurrent}>
+              <span class="wiz-menu__num">${pos}.</span>
+              <span class="wiz-menu__title">${esc(s.title)}</span>
+              <span class="wiz-menu__file">${fileLabel}</span>
+            </a>`;
+          }
+        }
+        html += `</div>`;
       }
-    });
+      html += `</div>`;
+    }
+    html += '</div>';
+    return html;
   }
 
-  // ------- bootstrap ----------------------------------------------------
+  function renderPanel() {
+    if (!state.ui) return;
+    let body;
+    if (state.roadmapView) body = renderRoadmapBody(state.roadmapView);
+    else if (state.currentStep) body = renderStepBody(state.currentStep);
+    else body = renderEmptyBody();
+    state.ui.body.innerHTML = body + renderStepList();
+    attachPanelHandlers();
+  }
+
+  function attachPanelHandlers() {
+    if (!state.ui) return;
+    const menu = state.ui.body.querySelector('.wiz-menu');
+    if (!menu) return;
+
+    for (const groupEl of menu.querySelectorAll('.wiz-menu__group')) {
+      if (groupEl.classList.contains('wiz-menu__group--empty')) continue;
+      const hdr = groupEl.querySelector('.wiz-menu__group-header');
+      if (!hdr) continue;
+      hdr.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const next = groupEl.dataset.state === 'open' ? 'closed' : 'open';
+        groupEl.dataset.state = next;
+        hdr.setAttribute('aria-expanded', next === 'open' ? 'true' : 'false');
+        const states = readGroupStates();
+        states[groupEl.dataset.label] = next;
+        writeGroupStates(states);
+      });
+    }
+
+    // Roadmap step click: stay on current page, swap panel to roadmap view.
+    for (const btn of menu.querySelectorAll('.wiz-menu__item--roadmap')) {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.id;
+        const step = state.steps.find(s => s.id === id);
+        if (!step) return;
+        state.roadmapView = step;
+        setBadge(String(state.steps.indexOf(step) + 1));
+        renderPanel();
+      });
+    }
+    // Real step links navigate; nothing to bind (browser handles <a href>).
+  }
+
+  // ------- panel show/hide ---------------------------------------------
+
+  function setPanelState(open) {
+    state.panelOpen = !!open;
+    state.ui.panel.hidden = !state.panelOpen;
+    state.ui.panel.dataset.state = state.panelOpen ? 'open' : 'closed';
+    state.ui.logo.setAttribute('aria-expanded', state.panelOpen ? 'true' : 'false');
+    writePanelState(state.panelOpen ? 'open' : 'closed');
+    if (state.panelOpen) renderPanel();
+  }
+  function togglePanel() { setPanelState(!state.panelOpen); }
+
+  // ------- boot --------------------------------------------------------
 
   async function boot() {
     let md;
@@ -537,25 +467,15 @@
       const res = await fetch(DOC_URL, { cache: 'no-cache' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       md = await res.text();
-    } catch (err) {
-      ui.narrationBody.innerHTML = `
-        <h2>Walkthrough konnte nicht geladen werden</h2>
-        <p>Der Begleittext liegt in <code>DEMO-FLOW.md</code> im Repo-Root.
-        Fehler beim Laden: <code>${esc(String(err))}</code></p>
-        <p>Sie können die Screens direkt über
-        <a href="../index.html">die Launcher-Übersicht</a> aufrufen.</p>`;
+    } catch {
+      // No DEMO-FLOW.md reachable — wizard stays invisible (don't pollute
+      // upstream pages with broken chrome).
       return;
     }
 
     const parsed = parseDemoFlow(md);
-    if (!parsed.steps.length) {
-      ui.narrationBody.innerHTML = `<p>Keine Schritte in DEMO-FLOW.md gefunden.</p>`;
-      return;
-    }
+    if (!parsed.steps.length) return;
 
-    // Apply the bid-document structure override: reorder steps and
-    // groups to mirror "3. Live-Demo folgender Use Cases". Steps not
-    // listed in the override fall through at the end so nothing is lost.
     if (WALKTHROUGH_STRUCTURE) {
       state.groups = WALKTHROUGH_STRUCTURE;
       const seen = new Set();
@@ -575,22 +495,29 @@
       state.groups = parsed.groups;
     }
 
-    // Restore: URL hash wins; else localStorage; else step 1.
-    const hashMatch = location.hash.match(/^#step-(\d+)$/);
-    let startId = null;
-    if (hashMatch) startId = hashMatch[1];
-    else {
-      try { startId = localStorage.getItem(STORAGE_KEY); } catch { /* ignore */ }
-    }
-    const startIdx = startId
-      ? Math.max(0, state.steps.findIndex(s => s.id === startId))
-      : 0;
-    state.currentIndex = startIdx >= 0 ? startIdx : 0;
+    state.currentStep = findStepForPath(state.steps);
+    state.ui = buildChrome();
 
-    buildStepMenu();
-    setNarrationState(readNarrationState());
-    attachHandlers();
-    renderStep();
+    if (state.currentStep) {
+      const pos = state.steps.indexOf(state.currentStep) + 1;
+      setBadge(String(pos));
+    } else {
+      setBadge('');
+    }
+
+    state.ui.logo.addEventListener('click', (e) => { e.stopPropagation(); togglePanel(); });
+    document.addEventListener('click', (e) => {
+      if (!state.panelOpen) return;
+      if (state.ui.panel.contains(e.target)) return;
+      if (state.ui.logo.contains(e.target)) return;
+      setPanelState(false);
+    });
+
+    // Clean up storage keys that are no longer used (current step is now
+    // implied by location.pathname).
+    try { localStorage.removeItem(OLD_STEP_KEY); } catch {}
+
+    setPanelState(readPanelState() === 'open');
   }
 
   if (document.readyState === 'loading') {
