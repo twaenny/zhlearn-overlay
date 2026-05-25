@@ -47,6 +47,44 @@ services:
       - "traefik.http.routers.zhlearn.tls.domains[0].sans=*.ai.srmedia.ch"
       - "traefik.http.services.zhlearn.loadbalancer.server.port=80"
 
+  # Auto-pull: polls upstream Digital4Health/ZHlearn every 120s and
+  # fast-forwards the local clone if main has new commits. Uses the
+  # workspace user's stored git credentials (mounted read-only) and
+  # runs as UID 1000 so any new files arrive with the same owner as
+  # the rest of the repo. New content goes live immediately — nginx
+  # bind-mounts the repo and HTML responses are `Cache-Control: no-store`.
+  auto-pull:
+    image: alpine/git:latest
+    container_name: ai-zhlearn-autopull
+    restart: unless-stopped
+    user: "1000:1000"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        # Copy mounted creds into a writable HOME so the `store` helper
+        # can refresh credentials without trying to write to the read-only
+        # source mounts.
+        mkdir -p /tmp/githome;
+        cp /tmp/seed/.git-credentials /tmp/githome/.git-credentials;
+        cp /tmp/seed/.gitconfig       /tmp/githome/.gitconfig;
+        chmod 600 /tmp/githome/.git-credentials;
+        export HOME=/tmp/githome;
+        echo "auto-pull started (interval 120s, repo=/repo)";
+        while true; do
+          out=$$(git -C /repo pull --ff-only 2>&1) || true;
+          case "$$out" in
+            *"Already up to date"*) : ;;
+            *) echo "[$$(date -u +%FT%TZ)] $$out" ;;
+          esac;
+          sleep 120;
+        done
+    environment:
+      HOME: /tmp/githome
+    volumes:
+      - /var/lib/docker/volumes/coder-ops-home/_data/projects/platform/tools/zhlearn:/repo
+      - /var/lib/docker/volumes/coder-ops-home/_data/.git-credentials:/tmp/seed/.git-credentials:ro
+      - /var/lib/docker/volumes/coder-ops-home/_data/.gitconfig:/tmp/seed/.gitconfig:ro
+
 networks:
   ai-proxy:
     external: true
