@@ -5,6 +5,12 @@
 https://zhlearn.ai.srmedia.ch — public, no auth (add Authentik forward-auth
 if the content becomes sensitive; cookbook lives in the operator notes).
 
+**Reviewer shortcuts:**
+- `…/` — upstream prototype launcher (overview page).
+- `…/walkthrough/` — wizard entry; defaults to step 1 (`lernplatz.html`).
+- `…/walkthrough/#step-N` — jump to step N (resolved by the launcher).
+- `…/N` (digits only, e.g. `…/7`) — alias for `…/walkthrough/#step-N`.
+
 ## Container
 
 `ai-zhlearn` on the `ai-proxy` Docker network. Image: `nginx:1.27-alpine`.
