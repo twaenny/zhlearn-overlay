@@ -23,11 +23,11 @@
   </div>
   <script>
     (async () => {
-      // Existing reviewer links: /walkthrough/, /walkthrough/#step-N.
-      // Resolve to the actual upstream HTML page that hosts the step.
+      // /walkthrough/        → step 1 (Discovery, lernplatz.html).
+      // /walkthrough/#step-N → step N's first file.
+      // Unknown / roadmap-only → upstream /index.html (overview).
       const hash = location.hash.match(/^#step-(\d+)$/);
-      if (!hash) { location.replace('/index.html'); return; }
-      const wantedId = hash[1];
+      const wantedId = hash ? hash[1] : '1';
       try {
         const md = await fetch('/DEMO-FLOW.md', { cache: 'no-cache' }).then(r => r.text());
         const headingRe = /^### Step (\d+)(?:\s*·\s*)?(.*?)$/gm;
@@ -35,8 +35,6 @@
           if (m[1] !== wantedId) continue;
           const files = [...m[2].matchAll(/`([^`]+\.html)`/g)].map(x => x[1]);
           if (files.length) { location.replace('/' + files[0]); return; }
-          // Roadmap step (no HTML file): land on overview, panel will
-          // surface the step when the reviewer opens it.
           location.replace('/index.html'); return;
         }
         location.replace('/index.html');

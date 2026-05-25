@@ -192,6 +192,7 @@
     currentStep: null,    // step matched to location.pathname (may be null)
     roadmapView: null,    // when user clicked a roadmap step from the list
     panelOpen: false,
+    selectorOpen: false,  // top-of-panel step dropdown — collapsed by default
     ui: null,
   };
 
@@ -236,7 +237,7 @@
     state.ui.badge.hidden = !text;
   }
 
-  function renderHeader(step, pos) {
+  function renderChips(step) {
     const meta = step.sections.filter(s => META_LABELS.has(s.label));
     const chips = [];
     const personaSec = meta.find(s => s.label === 'Persona');
@@ -249,11 +250,7 @@
         chips.push(`<span class="wiz-chip wiz-chip--mono">${inlineMd(facet.trim())}</span>`);
       }
     }
-    return `
-      <span class="wiz-step-eyebrow">Schritt ${esc(step.id)} von ${state.steps.length}</span>
-      <h2>${esc(step.title)}</h2>
-      <div class="wiz-chips">${chips.join('')}</div>
-    `;
+    return chips.length ? `<div class="wiz-chips">${chips.join('')}</div>` : '';
   }
 
   function renderFileRow(step) {
@@ -294,10 +291,9 @@
   }
 
   function renderStepBody(step) {
-    const pos = state.steps.indexOf(step) + 1;
     return `
       <div class="wiz-narration">
-        ${renderHeader(step, pos)}
+        ${renderChips(step)}
         ${renderFileRow(step)}
         ${renderNarrationSections(step)}
       </div>
@@ -314,9 +310,7 @@
     }).join('');
     return `
       <div class="wiz-narration wiz-narration--roadmap">
-        <span class="wiz-step-eyebrow">Roadmap-Schritt — kein Screen</span>
-        <h2>${esc(step.title)}</h2>
-        <div class="wiz-chips">${chips}</div>
+        ${chips ? `<div class="wiz-chips">${chips}</div>` : ''}
         ${sectionsHtml}
         <div class="wiz-roadmap__placeholder">
           Für diesen Schritt existiert noch kein Screen — die Surfaces sind durch
@@ -331,9 +325,7 @@
   function renderEmptyBody() {
     return `
       <div class="wiz-narration">
-        <span class="wiz-step-eyebrow">Reviewer-Walkthrough</span>
-        <h2>Übersicht — alle Screens</h2>
-        <p>Wählen Sie einen Schritt aus der Liste unten, um direkt zum
+        <p>Wählen Sie einen Schritt aus dem Auswahlmenü oben, um direkt zum
         passenden Prototyp-Screen zu springen.</p>
       </div>
     `;
@@ -344,6 +336,25 @@
     if (explicit === 'open') return true;
     if (explicit === 'closed') return false;
     return containsCurrent;
+  }
+
+  function renderSelector() {
+    const active = state.roadmapView || state.currentStep;
+    const pos = active ? state.steps.indexOf(active) + 1 : 0;
+    const total = state.steps.length;
+    const labelText = active
+      ? `Schritt ${pos} von ${total} · ${active.title}`
+      : `Schritt auswählen (${total} insgesamt)`;
+    const open = state.selectorOpen ? 'open' : 'closed';
+    return `
+      <div id="wiz-selector" data-state="${open}">
+        <button type="button" id="wiz-selector-btn" aria-expanded="${state.selectorOpen ? 'true' : 'false'}" aria-controls="wiz-selector-list">
+          <span class="wiz-selector__text">${esc(labelText)}</span>
+          <span class="wiz-selector__chev" aria-hidden="true">▾</span>
+        </button>
+        <div id="wiz-selector-list" class="wiz-selector__list">${renderStepList()}</div>
+      </div>
+    `;
   }
 
   function renderStepList() {
@@ -408,12 +419,24 @@
     if (state.roadmapView) body = renderRoadmapBody(state.roadmapView);
     else if (state.currentStep) body = renderStepBody(state.currentStep);
     else body = renderEmptyBody();
-    state.ui.body.innerHTML = body + renderStepList();
+    state.ui.body.innerHTML = renderSelector() + body;
     attachPanelHandlers();
   }
 
   function attachPanelHandlers() {
     if (!state.ui) return;
+
+    const selBtn = state.ui.body.querySelector('#wiz-selector-btn');
+    const selWrap = state.ui.body.querySelector('#wiz-selector');
+    if (selBtn && selWrap) {
+      selBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        state.selectorOpen = !state.selectorOpen;
+        selWrap.dataset.state = state.selectorOpen ? 'open' : 'closed';
+        selBtn.setAttribute('aria-expanded', state.selectorOpen ? 'true' : 'false');
+      });
+    }
+
     const menu = state.ui.body.querySelector('.wiz-menu');
     if (!menu) return;
 
@@ -440,6 +463,7 @@
         const step = state.steps.find(s => s.id === id);
         if (!step) return;
         state.roadmapView = step;
+        state.selectorOpen = false;
         setBadge(String(state.steps.indexOf(step) + 1));
         renderPanel();
       });
@@ -455,7 +479,10 @@
     state.ui.panel.dataset.state = state.panelOpen ? 'open' : 'closed';
     state.ui.logo.setAttribute('aria-expanded', state.panelOpen ? 'true' : 'false');
     writePanelState(state.panelOpen ? 'open' : 'closed');
-    if (state.panelOpen) renderPanel();
+    if (state.panelOpen) {
+      state.selectorOpen = false; // fresh panel: dropdown starts collapsed
+      renderPanel();
+    }
   }
   function togglePanel() { setPanelState(!state.panelOpen); }
 
