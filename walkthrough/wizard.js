@@ -21,6 +21,18 @@
   const DOC_URL = '../DEMO-FLOW.md';
   const REPO_BASE = '../'; // step files live one level above /walkthrough/
 
+  // Walkthrough structure — mirrors the bid document's "Live-Demo
+  // folgender Use Cases" list. Reorders + regroups steps regardless of
+  // their order in upstream DEMO-FLOW.md. Set to null to fall back to
+  // dynamic parsing of the document's `## ` H2 headings.
+  const WALKTHROUGH_STRUCTURE = [
+    { label: '1. Nutzerverwaltung — Rollen & Profile', stepIds: [] },
+    { label: '2. Erstellung & Publikation',            stepIds: ['10', '11', '9', '12', '13'] },
+    { label: '3. Verwaltung bestehender Angebote',     stepIds: ['14', '15'] },
+    { label: '4. Anmeldeprozess',                      stepIds: ['1', '2', '3', '4', '5', '6', '7', '8'] },
+    { label: '5. Dashboard & Gamification',            stepIds: ['16', '17'] },
+  ];
+
   // Labels that the reviewer-step blocks consistently use. Anything else
   // we encounter (Tone commitment, Governance commitment, …) is rendered
   // verbatim — the parser stays generic on purpose.
@@ -188,9 +200,6 @@
     openDirect:    document.getElementById('wiz-open-direct'),
     stepNow:       document.getElementById('wiz-step-now'),
     stepTotal:     document.getElementById('wiz-step-total'),
-    progress:      document.getElementById('wiz-progress-bar'),
-    prev:          document.getElementById('wiz-prev'),
-    next:          document.getElementById('wiz-next'),
     listBtn:       document.getElementById('wiz-step-list'),
     menu:          document.getElementById('wiz-step-menu'),
   };
@@ -254,57 +263,64 @@
       const stepsInGroup = g.stepIds
         .map(id => state.steps.find(s => s.id === id))
         .filter(Boolean);
-      if (!stepsInGroup.length) continue;
+      const isEmpty = stepsInGroup.length === 0;
 
       const containsCurrent = stepsInGroup.some(s => s.id === currentId);
-      const open = isGroupOpen(g.label, containsCurrent, groupStates);
+      const open = !isEmpty && isGroupOpen(g.label, containsCurrent, groupStates);
 
       const groupEl = document.createElement('div');
-      groupEl.className = 'wiz-menu__group';
+      groupEl.className = 'wiz-menu__group' + (isEmpty ? ' wiz-menu__group--empty' : '');
       groupEl.dataset.label = g.label;
       groupEl.dataset.state = open ? 'open' : 'closed';
 
-      const header = document.createElement('button');
-      header.type = 'button';
+      const header = document.createElement(isEmpty ? 'div' : 'button');
+      if (!isEmpty) header.type = 'button';
       header.className = 'wiz-menu__group-header';
-      header.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (!isEmpty) header.setAttribute('aria-expanded', open ? 'true' : 'false');
+      const chev = isEmpty ? '○' : '▸';
+      const badge = isEmpty ? 'Roadmap' : `${stepsInGroup.length}`;
       header.innerHTML = `
-        <span class="wiz-menu__chev" aria-hidden="true">▸</span>
+        <span class="wiz-menu__chev" aria-hidden="true">${chev}</span>
         <span class="wiz-menu__group-label">${esc(g.label)}</span>
-        <span class="wiz-menu__group-count">${stepsInGroup.length}</span>
+        <span class="wiz-menu__group-count">${badge}</span>
       `;
-      header.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const isOpenNow = groupEl.dataset.state === 'open';
-        const next = isOpenNow ? 'closed' : 'open';
-        groupEl.dataset.state = next;
-        header.setAttribute('aria-expanded', next === 'open' ? 'true' : 'false');
-        const states = readGroupStates();
-        states[g.label] = next;
-        writeGroupStates(states);
-      });
+      if (!isEmpty) {
+        header.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpenNow = groupEl.dataset.state === 'open';
+          const next = isOpenNow ? 'closed' : 'open';
+          groupEl.dataset.state = next;
+          header.setAttribute('aria-expanded', next === 'open' ? 'true' : 'false');
+          const states = readGroupStates();
+          states[g.label] = next;
+          writeGroupStates(states);
+        });
+      }
       groupEl.appendChild(header);
 
-      const itemsEl = document.createElement('div');
-      itemsEl.className = 'wiz-menu__items';
-      for (const s of stepsInGroup) {
-        const btn = document.createElement('button');
-        btn.className = 'wiz-menu__item';
-        btn.type = 'button';
-        btn.setAttribute('role', 'menuitem');
-        btn.dataset.id = s.id;
-        const fileLabel = s.files.length
-          ? esc(s.files[0]) + (s.files.length > 1 ? ' + …' : '')
-          : '— Roadmap';
-        btn.innerHTML = `
-          <span class="wiz-menu__num">${s.id}.</span>
-          <span class="wiz-menu__title">${esc(s.title)}</span>
-          <span class="wiz-menu__file">${fileLabel}</span>
-        `;
-        btn.addEventListener('click', () => { hideMenu(); goTo(s.id); });
-        itemsEl.appendChild(btn);
+      if (!isEmpty) {
+        const itemsEl = document.createElement('div');
+        itemsEl.className = 'wiz-menu__items';
+        for (const s of stepsInGroup) {
+          const btn = document.createElement('button');
+          btn.className = 'wiz-menu__item';
+          btn.type = 'button';
+          btn.setAttribute('role', 'menuitem');
+          btn.dataset.id = s.id;
+          const pos = state.steps.indexOf(s) + 1;
+          const fileLabel = s.files.length
+            ? esc(s.files[0]) + (s.files.length > 1 ? ' + …' : '')
+            : '— Roadmap';
+          btn.innerHTML = `
+            <span class="wiz-menu__num">${pos}.</span>
+            <span class="wiz-menu__title">${esc(s.title)}</span>
+            <span class="wiz-menu__file">${fileLabel}</span>
+          `;
+          btn.addEventListener('click', () => { hideMenu(); goTo(s.id); });
+          itemsEl.appendChild(btn);
+        }
+        groupEl.appendChild(itemsEl);
       }
-      groupEl.appendChild(itemsEl);
       frag.appendChild(groupEl);
     }
 
@@ -358,11 +374,9 @@
     const step = state.steps[state.currentIndex];
     if (!step) return;
 
-    // header counter + progress
-    ui.stepNow.textContent = step.id;
+    // header counter — position within the (possibly reordered) walkthrough
+    ui.stepNow.textContent = (state.currentIndex + 1);
     ui.stepTotal.textContent = state.steps.length;
-    const pct = Math.round(((state.currentIndex + 1) / state.steps.length) * 100);
-    ui.progress.style.setProperty('--p', pct + '%');
 
     // narration
     ui.narrationBody.innerHTML = renderNarration(step);
@@ -408,11 +422,6 @@
         ui.fileTabs.innerHTML = '';
       }
     }
-
-    // footer button states
-    ui.prev.disabled = state.currentIndex === 0;
-    ui.next.disabled = state.currentIndex === state.steps.length - 1;
-    ui.next.textContent = state.currentIndex === state.steps.length - 1 ? 'Fertig ✓' : 'Weiter →';
 
     // persistence + URL hash
     try { localStorage.setItem(STORAGE_KEY, step.id); } catch { /* private mode etc. */ }
@@ -489,8 +498,6 @@
   }
 
   function attachHandlers() {
-    ui.prev.addEventListener('click', () => goTo(state.currentIndex - 1));
-    ui.next.addEventListener('click', () => goTo(state.currentIndex + 1));
     ui.listBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMenu(); });
     ui.narrationToggle.addEventListener('click', (e) => { e.stopPropagation(); toggleNarration(); });
     document.addEventListener('click', (e) => {
@@ -541,11 +548,31 @@
     }
 
     const parsed = parseDemoFlow(md);
-    state.steps = parsed.steps;
-    state.groups = parsed.groups;
-    if (!state.steps.length) {
+    if (!parsed.steps.length) {
       ui.narrationBody.innerHTML = `<p>Keine Schritte in DEMO-FLOW.md gefunden.</p>`;
       return;
+    }
+
+    // Apply the bid-document structure override: reorder steps and
+    // groups to mirror "3. Live-Demo folgender Use Cases". Steps not
+    // listed in the override fall through at the end so nothing is lost.
+    if (WALKTHROUGH_STRUCTURE) {
+      state.groups = WALKTHROUGH_STRUCTURE;
+      const seen = new Set();
+      const ordered = [];
+      for (const g of WALKTHROUGH_STRUCTURE) {
+        for (const id of g.stepIds) {
+          const s = parsed.steps.find(x => x.id === id);
+          if (s && !seen.has(s.id)) { ordered.push(s); seen.add(s.id); }
+        }
+      }
+      for (const s of parsed.steps) {
+        if (!seen.has(s.id)) { ordered.push(s); seen.add(s.id); }
+      }
+      state.steps = ordered;
+    } else {
+      state.steps = parsed.steps;
+      state.groups = parsed.groups;
     }
 
     // Restore: URL hash wins; else localStorage; else step 1.

@@ -14,7 +14,6 @@
   --wiz-accent-soft: var(--color-blue-soft, #d6e9f6);
   --wiz-focus: var(--color-focus, #00b1e5);
   --wiz-header-h: 56px;
-  --wiz-footer-h: 56px;
   --wiz-narration-w: 400px;
   --wiz-narration-rail-w: 36px;
 }
@@ -26,8 +25,9 @@ body {
   background: var(--wiz-bg-app);
   color: var(--wiz-text);
   display: grid;
-  grid-template-rows: var(--wiz-header-h) 1fr var(--wiz-footer-h);
-  min-height: 100vh;
+  grid-template-rows: var(--wiz-header-h) 1fr;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ---------- header ---------- */
@@ -332,49 +332,6 @@ body {
   color: var(--wiz-text-soft);
 }
 
-/* ---------- footer ---------- */
-.wiz-footer {
-  display: grid;
-  grid-template-columns: 140px 1fr 140px;
-  align-items: center;
-  padding: 0 20px;
-  border-top: var(--wiz-rail);
-  background: var(--wiz-bg-panel);
-  gap: 12px;
-}
-.wiz-footer__center { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.wiz-progress {
-  display: block;
-  width: min(420px, 60vw);
-  height: 4px;
-  background: var(--color-black-15);
-  position: relative;
-  border-radius: 1px;
-  overflow: hidden;
-}
-.wiz-progress__bar {
-  position: absolute;
-  inset: 0;
-  width: var(--p, 0%);
-  background: var(--wiz-accent);
-  transition: width 200ms ease-out;
-}
-.wiz-shortcuts {
-  font-size: 11px;
-  color: var(--wiz-text-soft);
-  font-family: var(--font-family-mono, ui-monospace, monospace);
-}
-.wiz-shortcuts kbd {
-  font-family: inherit;
-  border: 1px solid var(--color-black-15);
-  padding: 1px 5px;
-  border-radius: 2px;
-  background: var(--color-white);
-  font-size: 10.5px;
-  margin: 0 1px;
-}
-#wiz-next { justify-self: end; }
-
 /* ---------- step menu dropdown (foldable journey groups) ---------- */
 .wiz-menu {
   position: fixed;
@@ -436,6 +393,17 @@ body {
 .wiz-menu__items { display: none; padding-bottom: 4px; }
 .wiz-menu__group[data-state="open"] .wiz-menu__items { display: block; }
 
+/* Empty groups (no walkthrough screens yet) — show the label with a
+   Roadmap badge so the structure stays visible against the bid doc. */
+.wiz-menu__group--empty .wiz-menu__group-header { cursor: default; opacity: 0.7; }
+.wiz-menu__group--empty .wiz-menu__group-header:hover { background: transparent; }
+.wiz-menu__group--empty .wiz-menu__chev { color: var(--color-black-25, #c0c0c0); }
+.wiz-menu__group--empty .wiz-menu__group-count {
+  background: var(--wiz-bg-stage);
+  color: var(--wiz-text-soft);
+  font-style: italic;
+}
+
 .wiz-menu__item {
   display: grid;
   grid-template-columns: 24px 1fr;
@@ -484,8 +452,8 @@ body {
     border-bottom: var(--wiz-rail);
     flex-direction: column;
   }
-  .wiz-narration__panel { width: 100%; max-height: 240px; }
-  .wiz-narration[data-state="collapsed"] .wiz-narration__panel { max-height: 0; }
+  .wiz-narration__panel { flex: 0 0 auto; width: 100%; max-height: 240px; }
+  .wiz-narration[data-state="collapsed"] .wiz-narration__panel { max-height: 0; flex-basis: 0; }
   .wiz-narration__toggle {
     width: 100%;
     flex-direction: row;
@@ -497,7 +465,5 @@ body {
   .wiz-narration__toggle-chev { transform: rotate(-90deg); }
   .wiz-narration[data-state="collapsed"] .wiz-narration__toggle-chev { transform: rotate(90deg); }
   .wiz-narration__toggle-label { writing-mode: horizontal-tb; transform: none; }
-  .wiz-footer { grid-template-columns: 1fr 1fr 1fr; }
-  .wiz-shortcuts { display: none; }
   .wiz-menu { right: 8px; width: calc(100vw - 16px); max-width: 360px; }
 }
