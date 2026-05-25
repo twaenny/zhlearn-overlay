@@ -340,10 +340,9 @@
 
   function renderSelector() {
     const active = state.roadmapView || state.currentStep;
-    const pos = active ? state.steps.indexOf(active) + 1 : 0;
     const total = state.steps.length;
     const labelText = active
-      ? `Schritt ${pos} von ${total} · ${active.title}`
+      ? `Schritt ${active.id} · ${active.title}`
       : `Schritt auswählen (${total} insgesamt)`;
     const open = state.selectorOpen ? 'open' : 'closed';
     return `
@@ -386,20 +385,19 @@
       if (!isEmpty) {
         html += `<div class="wiz-menu__items">`;
         for (const s of stepsInGroup) {
-          const pos = state.steps.indexOf(s) + 1;
           const fileLabel = s.files.length
             ? esc(s.files[0]) + (s.files.length > 1 ? ' + …' : '')
             : '— Roadmap';
           const isCurrent = s.id === currentId ? ' aria-current="true"' : '';
           if (s.isRoadmap) {
             html += `<button class="wiz-menu__item wiz-menu__item--roadmap" type="button" data-id="${esc(s.id)}"${isCurrent}>
-              <span class="wiz-menu__num">${pos}.</span>
+              <span class="wiz-menu__num">${esc(s.id)}.</span>
               <span class="wiz-menu__title">${esc(s.title)}</span>
               <span class="wiz-menu__file">${fileLabel}</span>
             </button>`;
           } else {
             html += `<a class="wiz-menu__item" href="/${esc(s.files[0])}" data-id="${esc(s.id)}"${isCurrent}>
-              <span class="wiz-menu__num">${pos}.</span>
+              <span class="wiz-menu__num">${esc(s.id)}.</span>
               <span class="wiz-menu__title">${esc(s.title)}</span>
               <span class="wiz-menu__file">${fileLabel}</span>
             </a>`;
@@ -464,7 +462,7 @@
         if (!step) return;
         state.roadmapView = step;
         state.selectorOpen = false;
-        setBadge(String(state.steps.indexOf(step) + 1));
+        setBadge(step.id);
         renderPanel();
       });
     }
@@ -526,8 +524,7 @@
     state.ui = buildChrome();
 
     if (state.currentStep) {
-      const pos = state.steps.indexOf(state.currentStep) + 1;
-      setBadge(String(pos));
+      setBadge(state.currentStep.id);
     } else {
       setBadge('');
     }
