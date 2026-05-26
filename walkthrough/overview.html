@@ -80,6 +80,47 @@
     .ov-bug { margin: 4px 0; padding-left: 6px; border-left: 2px solid var(--ov-bad); color: var(--ov-text-soft); }
     .ov-bug strong { color: var(--ov-text); }
 
+    /* ---- Bugherd triage section (bottom of page) ---- */
+    .ov-bh-tasks { background: var(--ov-panel); border: 1px solid var(--ov-rail); border-radius: 2px; padding: 22px 24px 18px; margin-top: 32px; box-shadow: var(--ov-shadow); }
+    .ov-bh-tasks h2 { margin: 0 0 4px; font-weight: 900; font-size: 18px; letter-spacing: -0.01em; }
+    .ov-bh-tasks__sub { margin: 0 0 18px; color: var(--ov-text-soft); font-size: 13px; }
+    .ov-task { border: 1px solid var(--ov-rail); border-radius: 2px; margin-bottom: 10px; background: #fff; }
+    .ov-task--loading { padding: 14px 16px; color: var(--ov-text-soft); font-size: 12.5px; }
+    .ov-task__head { display: grid; grid-template-columns: 60px 1fr auto; gap: 12px; align-items: center; padding: 12px 16px; cursor: pointer; }
+    .ov-task__head:hover { background: var(--ov-bg); }
+    .ov-task__id { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; color: var(--ov-bad); font-weight: 900; }
+    .ov-task__title-wrap { min-width: 0; }
+    .ov-task__title { font-weight: 900; font-size: 13.5px; line-height: 1.35; }
+    .ov-task__meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; color: var(--ov-text-soft); font-size: 11px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; }
+    .ov-task__meta a { color: var(--ov-accent); text-decoration: none; }
+    .ov-task__meta a:hover { text-decoration: underline; }
+    .ov-task__chev { color: var(--ov-text-soft); font-size: 11px; transition: transform 140ms; }
+    .ov-task[data-open="true"] .ov-task__chev { transform: rotate(90deg); }
+    .ov-task__body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--ov-rail); }
+    .ov-task[data-open="true"] .ov-task__body { display: block; }
+    .ov-task__grid { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 16px; margin-top: 14px; }
+    .ov-task__field { margin-bottom: 12px; }
+    .ov-task__label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ov-text-soft); margin-bottom: 4px; font-weight: 900; }
+    .ov-task__value { font-size: 12.5px; line-height: 1.5; word-break: break-word; }
+    .ov-task__value code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11.5px; background: var(--ov-bg); padding: 2px 5px; border-radius: 2px; display: inline-block; max-width: 100%; overflow-wrap: anywhere; }
+    .ov-task__value--mono { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; background: var(--ov-bg); padding: 8px 10px; border-radius: 2px; white-space: pre-wrap; word-break: break-all; }
+    .ov-task__screenshot { display: block; border: 1px solid var(--ov-rail); border-radius: 2px; max-width: 100%; height: auto; cursor: zoom-in; }
+    .ov-task__screenshot-caption { display: block; margin-top: 6px; font-size: 10.5px; color: var(--ov-text-soft); text-align: center; }
+    .ov-task__actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+    .ov-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 2px; border: 1px solid var(--ov-rail); background: #fff; font: inherit; font-family: 'Inter', system-ui, sans-serif; font-weight: 900; font-size: 12px; cursor: pointer; color: var(--ov-text); text-decoration: none; }
+    .ov-btn:hover { border-color: var(--ov-accent); color: var(--ov-accent); }
+    .ov-btn--primary { background: var(--ov-accent); color: #fff; border-color: var(--ov-accent); }
+    .ov-btn--primary:hover { background: var(--ov-accent-dark); border-color: var(--ov-accent-dark); color: #fff; }
+    .ov-btn[data-state="done"] { background: var(--ov-good); border-color: var(--ov-good); color: #fff; }
+    .ov-task__filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; font-size: 12px; color: var(--ov-text-soft); }
+    .ov-task__filter input { flex: 1; min-width: 180px; padding: 7px 10px; border: 1px solid var(--ov-rail); border-radius: 2px; font: inherit; font-size: 12.5px; }
+    .ov-task__filter input:focus { outline: 2px solid var(--ov-focus, #00b1e5); outline-offset: -1px; border-color: transparent; }
+
+    @media (max-width: 720px) {
+      .ov-task__grid { grid-template-columns: 1fr; }
+      .ov-task__head { grid-template-columns: 50px 1fr auto; gap: 8px; padding: 10px 12px; }
+    }
+
     @media (max-width: 720px) {
       .ov-shell { padding: 20px 14px 60px; }
       .ov-head h1 { font-size: 22px; }
@@ -105,6 +146,16 @@
     </div>
 
     <div id="ov-sections"></div>
+
+    <section class="ov-bh-tasks" id="ov-bh-tasks">
+      <h2>🐞 Bugherd Tasks — Fix-Prompts</h2>
+      <p class="ov-bh-tasks__sub">Klick auf einen Task → Details. Der <strong>„Prompt kopieren"</strong>-Button erzeugt einen vollständigen Claude-Code-Prompt mit Page, CSS-Selector, Screenshot-URL und Architektur-Regeln. In eine frische <code>claude</code>-Session einfügen.</p>
+      <div class="ov-task__filter">
+        <input type="text" id="ov-task-search" placeholder="Filter: Page, Beschreibung, BH-ID …" />
+        <span id="ov-task-count"></span>
+      </div>
+      <div id="ov-task-list"><div class="ov-task ov-task--loading">Lade Bugherd-Tasks …</div></div>
+    </section>
 
     <p style="margin-top:32px; color: var(--ov-text-soft); font-size: 11px; text-align: center;">
       Wizard-Overlay aktiv auf allen Prototyp-Seiten (Logo links unten). · Auto-Refresh alle 60 s.
@@ -224,6 +275,7 @@
     const bhSummary = document.getElementById('ov-bh-summary');
     const tasksByFile = new Map();    // 'lernplatz.html' → [{id, title, url}]
     let totalOpen = 0;
+    let allTaskDetails = [];          // full per-task detail records, for the bottom triage section
 
     function renderSections() {
       sectionsEl.innerHTML = '';
@@ -317,6 +369,7 @@
         ));
 
         tasksByFile.clear();
+        allTaskDetails = [];
         for (let i = 0; i < tasks.length; i++) {
           const t = tasks[i];
           const d = detail[i] && detail[i].task;
@@ -331,6 +384,7 @@
             admin_link: (d && d.admin_link) || `https://www.bugherd.com/projects/522520/tasks/${t.local_task_id}`,
           });
           tasksByFile.set(file, arr);
+          if (d) allTaskDetails.push(d);
         }
 
         const filesWithBugs = [...tasksByFile.keys()].filter(f => f !== '(root)');
@@ -340,11 +394,229 @@
           <a class="ov-bh__cta" href="https://www.bugherd.com/projects/522520" target="_blank" rel="noopener">Im Bugherd ↗</a>
         `;
         renderSections();
+        renderTaskList();
       } catch (err) {
         bhCount.textContent = 'Bugherd: Fehler';
         bhCount.classList.add('ov-badge--bad');
         bhSummary.innerHTML = `<span class="ov-bh__icon" style="background:#b00020">!</span><span class="ov-bh__text">Bugherd-Abruf fehlgeschlagen: ${escape(String(err))}</span>`;
       }
+    }
+
+    // ---- Bugherd triage list (bottom of page) ----
+
+    const taskListEl = document.getElementById('ov-task-list');
+    const taskCountEl = document.getElementById('ov-task-count');
+    const taskSearchEl = document.getElementById('ov-task-search');
+
+    function renderTaskList() {
+      if (!allTaskDetails.length) {
+        taskListEl.innerHTML = '<div class="ov-task ov-task--loading">Keine offenen Tasks.</div>';
+        taskCountEl.textContent = '';
+        return;
+      }
+      // Sort: roughly newest first (descending local_task_id).
+      const sorted = [...allTaskDetails].sort((a, b) => (b.local_task_id || 0) - (a.local_task_id || 0));
+      const q = (taskSearchEl.value || '').trim().toLowerCase();
+      const filtered = q
+        ? sorted.filter(t => taskSearchable(t).includes(q))
+        : sorted;
+      taskCountEl.textContent = q ? `${filtered.length} / ${sorted.length}` : `${sorted.length} Task(s)`;
+      taskListEl.innerHTML = filtered.map(renderTask).join('');
+      attachTaskHandlers();
+    }
+
+    function taskSearchable(t) {
+      return [
+        'bh-' + (t.local_task_id || ''),
+        t.url || '',
+        t.description || '',
+        (t.selector_info && t.selector_info.path) || '',
+        (t.requester && t.requester.display_name) || '',
+      ].join(' ').toLowerCase();
+    }
+
+    function renderTask(t) {
+      const id = t.local_task_id || t.id;
+      const pageFile = (t.url || '').replace(/^\//, '') || '(unknown)';
+      const desc = t.description || '(keine Beschreibung)';
+      const selPath = (t.selector_info && t.selector_info.path) || '';
+      const selHtml = (t.selector_info && t.selector_info.html) || '';
+      const screenshot = t.screenshot_url || '';
+      const screenshotData = t.screenshot_data || {};
+      const reporter = (t.requester && t.requester.display_name) || t.requester_email || '—';
+      const created = t.created_at ? new Date(t.created_at).toLocaleString('de-CH') : '—';
+      const adminLink = t.admin_link || `https://www.bugherd.com/projects/522520/tasks/${id}`;
+      return `
+        <article class="ov-task" data-id="${esc(String(id))}">
+          <div class="ov-task__head">
+            <span class="ov-task__id">BH-${esc(String(id))}</span>
+            <div class="ov-task__title-wrap">
+              <div class="ov-task__title">${esc(desc.slice(0, 200))}</div>
+              <div class="ov-task__meta">
+                <span>📄 ${esc(pageFile)}</span>
+                <span>👤 ${esc(reporter)}</span>
+                <span>🕒 ${esc(created)}</span>
+                <span>${esc(t.status || '—')}</span>
+              </div>
+            </div>
+            <span class="ov-task__chev">▸</span>
+          </div>
+          <div class="ov-task__body">
+            <div class="ov-task__grid">
+              <div>
+                <div class="ov-task__field">
+                  <span class="ov-task__label">Beschreibung</span>
+                  <div class="ov-task__value">${esc(desc)}</div>
+                </div>
+                <div class="ov-task__field">
+                  <span class="ov-task__label">Page</span>
+                  <div class="ov-task__value"><a href="${esc(t.site || '')}${esc(t.url || '')}" target="_blank" rel="noopener"><code>${esc(pageFile)}</code></a></div>
+                </div>
+                ${selPath ? `
+                <div class="ov-task__field">
+                  <span class="ov-task__label">CSS-Selector</span>
+                  <div class="ov-task__value--mono">${esc(selPath)}</div>
+                </div>` : ''}
+                ${selHtml ? `
+                <div class="ov-task__field">
+                  <span class="ov-task__label">HTML-Element</span>
+                  <div class="ov-task__value--mono">${esc(selHtml)}</div>
+                </div>` : ''}
+                <div class="ov-task__field">
+                  <span class="ov-task__label">Browser / Viewport</span>
+                  <div class="ov-task__value" style="font-size: 11.5px; color: var(--ov-text-soft);">${esc(t.requester_browser || '—')} · ${esc(t.requester_browser_size || '—')} · ${esc(t.requester_os || '—')}</div>
+                </div>
+              </div>
+              <div>
+                ${screenshot ? `
+                  <a href="${esc(screenshot)}" target="_blank" rel="noopener" title="Original öffnen">
+                    <img class="ov-task__screenshot" src="${esc(screenshot)}" alt="Bugherd-Screenshot BH-${esc(String(id))}" loading="lazy" />
+                  </a>
+                  ${(screenshotData.screenshot_pin_x != null) ? `<span class="ov-task__screenshot-caption">Pin: ${screenshotData.screenshot_pin_x}, ${screenshotData.screenshot_pin_y} · ${screenshotData.screenshot_width}×${screenshotData.screenshot_height}</span>` : ''}
+                ` : '<div style="color: var(--ov-text-soft); font-size: 11.5px;">Kein Screenshot</div>'}
+              </div>
+            </div>
+            <div class="ov-task__actions">
+              <button class="ov-btn ov-btn--primary" data-copy="${esc(String(id))}">📋 Prompt kopieren</button>
+              <a class="ov-btn" href="${esc(adminLink)}" target="_blank" rel="noopener">In Bugherd öffnen ↗</a>
+              ${t.url ? `<a class="ov-btn" href="${esc(t.url)}" target="_blank" rel="noopener">Page öffnen ↗</a>` : ''}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function attachTaskHandlers() {
+      for (const head of taskListEl.querySelectorAll('.ov-task__head')) {
+        head.addEventListener('click', () => {
+          const t = head.closest('.ov-task');
+          t.dataset.open = t.dataset.open === 'true' ? 'false' : 'true';
+        });
+      }
+      for (const btn of taskListEl.querySelectorAll('[data-copy]')) {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.copy;
+          const t = allTaskDetails.find(x => String(x.local_task_id || x.id) === id);
+          if (!t) return;
+          const prompt = buildPrompt(t);
+          try {
+            await navigator.clipboard.writeText(prompt);
+            const orig = btn.textContent;
+            btn.textContent = '✓ Kopiert';
+            btn.dataset.state = 'done';
+            setTimeout(() => { btn.textContent = orig; btn.removeAttribute('data-state'); }, 2000);
+          } catch {
+            // Fallback: open a textarea + select all so the user can ⌘C/Ctrl+C.
+            const ta = document.createElement('textarea');
+            ta.value = prompt; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); btn.textContent = '✓ Kopiert'; }
+            catch { btn.textContent = '⚠ Manuell kopieren'; }
+            setTimeout(() => ta.remove(), 100);
+          }
+        });
+      }
+    }
+
+    function buildPrompt(t) {
+      const id       = t.local_task_id || t.id;
+      const pagePath = t.url || '(unknown)';
+      const pageFile = pagePath.replace(/^\//, '');
+      const fullUrl  = (t.site || 'https://zhlearn.ai.srmedia.ch') + pagePath;
+      const desc     = t.description || '(no description)';
+      const selPath  = (t.selector_info && t.selector_info.path) || '(no selector)';
+      const selHtml  = (t.selector_info && t.selector_info.html) || '(no HTML)';
+      const screenshot = t.screenshot_url || '(no screenshot)';
+      const reporter = (t.requester && t.requester.display_name) || t.requester_email || '—';
+      const env      = [t.requester_browser, t.requester_browser_size, t.requester_os].filter(Boolean).join(' · ') || '—';
+      return [
+        `# Bugherd Fix — ZHlearn overlay (BH-${id})`,
+        ``,
+        `## Architecture (read first, do NOT change)`,
+        ``,
+        `- Static HTML prototype live at https://zhlearn.ai.srmedia.ch`,
+        `- Two sibling repos:`,
+        `  - \`~/projects/platform/tools/zhlearn/\` — UPSTREAM CLONE`,
+        `    (Digital4Health/ZHlearn:main). **NEVER edit, NEVER commit.**`,
+        `  - \`~/projects/platform/tools/zhlearn-overlay/\` — all fixes go here.`,
+        `- Wizard chrome is injected into every upstream HTML page via`,
+        `  nginx \`sub_filter\` (\`deploy/nginx.conf\`). All wizard DOM lives`,
+        `  inside \`<div id="wiz-root">\`; all CSS is scoped under \`#wiz-root …\`.`,
+        `- Container is \`ai-zhlearn\`; bind-mounts pick up edits on the next`,
+        `  page load. nginx config edits need:`,
+        `    \`docker exec ai-zhlearn nginx -t && docker exec ai-zhlearn nginx -s reload\``,
+        `- Read \`zhlearn-overlay/CLAUDE.md\` for the full architecture rules.`,
+        ``,
+        `## Bug (Bugherd task BH-${id})`,
+        ``,
+        `- **URL:** ${fullUrl}`,
+        `- **Page file:** \`${pageFile}\``,
+        `- **CSS selector:**`,
+        `  \`\`\``,
+        `  ${selPath}`,
+        `  \`\`\``,
+        `- **HTML element:**`,
+        `  \`\`\`html`,
+        `  ${selHtml}`,
+        `  \`\`\``,
+        `- **Screenshot:** ${screenshot}`,
+        `- **Reporter:** ${reporter}`,
+        `- **Reporter environment:** ${env}`,
+        ``,
+        `### Description from reporter`,
+        ``,
+        `> ${desc.split('\n').join('\n> ')}`,
+        ``,
+        `## Constraints`,
+        ``,
+        `- **Smallest possible diff.** No drive-by refactors.`,
+        `- If the bug is in upstream HTML/CSS, fix via the overlay only:`,
+        `  - DOM injection in \`walkthrough/wizard.js\``,
+        `  - CSS rule scoped under \`#wiz-root\` in \`walkthrough/wizard.css\``,
+        `  - nginx \`sub_filter\` in \`deploy/nginx.conf\``,
+        `  - **Never** edit \`~/projects/platform/tools/zhlearn/*\`.`,
+        `- Any new CSS class must be scoped under \`#wiz-root\` so it doesn't`,
+        `  leak into upstream pages.`,
+        `- The dead-link toast handler (\`isDeadLink\` / \`showToast\` in`,
+        `  \`wizard.js\`) and the floating logo/panel chrome should not be`,
+        `  touched unless the bug is in them directly.`,
+        ``,
+        `## Done when`,
+        ``,
+        `- Visible behavior matches what the reporter expected (per the`,
+        `  screenshot + description above).`,
+        `- \`git diff\` shows the smallest possible change.`,
+        `- nginx config changes: \`docker exec ai-zhlearn nginx -t\` passes.`,
+        `- JS changes: \`node --check walkthrough/wizard.js\` passes.`,
+        `- Commit message: \`fix(walkthrough|deploy): <short> [BH-${id}]\``,
+        `- Push: \`git push origin main\` (dual-pushes GitHub + Forgejo).`,
+        ``,
+      ].join('\n');
+    }
+
+    if (taskSearchEl) {
+      taskSearchEl.addEventListener('input', renderTaskList);
     }
 
     renderSections();
