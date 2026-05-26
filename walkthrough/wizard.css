@@ -376,12 +376,9 @@
   font-style: italic;
 }
 #wiz-root .wiz-menu__item {
-  display: grid;
-  grid-template-columns: 22px 1fr;
-  align-items: baseline;
-  gap: 3px 8px;
+  display: block;
   width: 100%;
-  padding: 5px 12px 5px 30px;
+  padding: 6px 12px 6px 30px;
   border: 0;
   border-left: 2px solid transparent;
   background: transparent;
@@ -403,14 +400,10 @@
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 900;
 }
-#wiz-root .wiz-menu__num {
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-  font-size: 10.5px;
-  color: var(--wiz-text-soft);
-}
-#wiz-root .wiz-menu__title { line-height: 1.3; }
+#wiz-root .wiz-menu__title { display: block; line-height: 1.3; }
 #wiz-root .wiz-menu__file {
-  grid-column: 2;
+  display: block;
+  margin-top: 2px;
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: 9.5px;
   color: var(--wiz-text-soft);

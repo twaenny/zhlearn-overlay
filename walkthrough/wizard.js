@@ -28,7 +28,7 @@
   // dynamic parsing of the document's `## ` H2 headings.
   const WALKTHROUGH_STRUCTURE = [
     { label: '1. Nutzerverwaltung — Rollen & Profile', stepIds: [] },
-    { label: '2. Erstellung & Publikation',            stepIds: ['10', '11', '9', '12', '13'] },
+    { label: '2. Erstellung & Publikation',            stepIds: ['9', '10', '11', '12', '13'] },
     { label: '3. Verwaltung bestehender Angebote',     stepIds: ['14', '15'] },
     { label: '4. Anmeldeprozess',                      stepIds: ['1', '2', '3', '4', '5', '6', '7', '8'] },
     { label: '5. Dashboard & Gamification',            stepIds: ['16', '17'] },
@@ -391,13 +391,11 @@
           const isCurrent = s.id === currentId ? ' aria-current="true"' : '';
           if (s.isRoadmap) {
             html += `<button class="wiz-menu__item wiz-menu__item--roadmap" type="button" data-id="${esc(s.id)}"${isCurrent}>
-              <span class="wiz-menu__num">${esc(s.id)}.</span>
               <span class="wiz-menu__title">${esc(s.title)}</span>
               <span class="wiz-menu__file">${fileLabel}</span>
             </button>`;
           } else {
             html += `<a class="wiz-menu__item" href="/${esc(s.files[0])}" data-id="${esc(s.id)}"${isCurrent}>
-              <span class="wiz-menu__num">${esc(s.id)}.</span>
               <span class="wiz-menu__title">${esc(s.title)}</span>
               <span class="wiz-menu__file">${fileLabel}</span>
             </a>`;
