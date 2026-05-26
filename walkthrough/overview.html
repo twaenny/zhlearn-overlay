@@ -281,32 +281,58 @@
     // ---- Bugherd ----
     async function loadBugherd() {
       try {
-        const res = await fetch('/api/bugherd/projects/522520/tasks.json?status=feedback,backlog,todo,doing', { cache: 'no-cache' });
-        // Bugherd's API returns 401 for missing key + 500 for no auth
-        // header at all (Rails session quirk); CF 400s on malformed
-        // base64. Treat any non-success as "API not yet configured".
-        if (res.status === 401 || res.status === 500 || res.status === 400) {
+        const listRes = await fetch('/api/bugherd/projects/522520/tasks.json?status=feedback,backlog,todo,doing', { cache: 'no-cache' });
+        // 401 = missing/bad key; 500 = Bugherd Rails error on no auth;
+        // 400 = CF rejects malformed auth. Treat any non-200 as
+        // "not yet configured" so the page still works as a flow doc.
+        if (listRes.status === 401 || listRes.status === 500 || listRes.status === 400) {
           bhCount.textContent = 'Bugherd: nicht konfiguriert';
           bhCount.classList.add('ov-badge--warn');
-          bhSummary.innerHTML = '<span class="ov-bh__icon" style="background:#b06400">!</span><span class="ov-bh__text">Bugherd-API ist nicht konfiguriert. Setup-Hinweise in <code>deploy/bugherd-auth.snippet.example</code>.</span>';
+          bhSummary.innerHTML = '<span class="ov-bh__icon" style="background:#b06400">!</span><span class="ov-bh__text">Bugherd-API ist nicht konfiguriert. Setup-Hinweise in <code>deploy/bugherd-auth.example</code>.</span>';
           return;
         }
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
-        const tasks = (data && data.tasks) || [];
+        if (!listRes.ok) throw new Error('HTTP ' + listRes.status);
+        const listData = await listRes.json();
+        const tasks = (listData && listData.tasks) || [];
         totalOpen = tasks.length;
-        tasksByFile.clear();
-        for (const t of tasks) {
-          const url = t.site || t.url || '';
-          const m = url.match(/\/([^\/?#]+\.html)(?:[?#].*)?$/);
-          const file = m ? m[1] : '(root)';
-          const arr = tasksByFile.get(file) || [];
-          arr.push({ id: t.local_task_id || t.id, title: (t.description || '').slice(0, 140), url });
-          tasksByFile.set(file, arr);
-        }
+
+        // Render the summary strip immediately so the user sees the
+        // total without waiting for per-task detail fetches.
         bhCount.textContent = `Bugherd: ${totalOpen} offen`;
         bhCount.classList.remove('ov-badge--warn');
         bhCount.classList.add(totalOpen ? 'ov-badge--bad' : 'ov-badge--ok');
+        bhSummary.innerHTML = `
+          <span class="ov-bh__icon" style="background:${totalOpen ? '#b00020' : '#1e7f3a'}">${totalOpen}</span>
+          <span class="ov-bh__text"><strong>${totalOpen}</strong> offene Bugherd-Tasks, lade Page-Zuordnung…</span>
+          <a class="ov-bh__cta" href="https://www.bugherd.com/projects/522520" target="_blank" rel="noopener">Im Bugherd ↗</a>
+        `;
+
+        // The list endpoint doesn't include the task's page URL or
+        // selector — only the per-task endpoint does. Fetch them in
+        // parallel and group by HTML filename.
+        const detail = await Promise.all(tasks.map(t =>
+          fetch(`/api/bugherd/projects/522520/tasks/${t.id}.json`, { cache: 'no-cache' })
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null)
+        ));
+
+        tasksByFile.clear();
+        for (let i = 0; i < tasks.length; i++) {
+          const t = tasks[i];
+          const d = detail[i] && detail[i].task;
+          const pagePath = (d && d.url) || '';
+          const m = pagePath.match(/\/?([^\/?#]+\.html)(?:[?#].*)?$/);
+          const file = m ? m[1] : '(root)';
+          const arr = tasksByFile.get(file) || [];
+          arr.push({
+            id: t.local_task_id || t.id,
+            title: (t.description || '').slice(0, 140),
+            url: pagePath,
+            admin_link: (d && d.admin_link) || `https://www.bugherd.com/projects/522520/tasks/${t.local_task_id}`,
+          });
+          tasksByFile.set(file, arr);
+        }
+
         const filesWithBugs = [...tasksByFile.keys()].filter(f => f !== '(root)');
         bhSummary.innerHTML = `
           <span class="ov-bh__icon" style="background:${totalOpen ? '#b00020' : '#1e7f3a'}">${totalOpen}</span>

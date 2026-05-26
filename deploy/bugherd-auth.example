@@ -1,0 +1,25 @@
+# Bugherd API authentication snippet for the nginx /api/bugherd/ proxy.
+#
+# IMPORTANT: this is NOT the same as the sidebar widget key you see
+# in the <script src="sidebarv2.js?apikey=..."> tag — that one is the
+# public project-identifier and gets "invalid api key" from the REST
+# API. You need your PERSONAL REST token from:
+#   https://www.bugherd.com/settings/api    (or Profile → API access)
+#
+# Setup:
+#   1. Grab your personal REST API token (32+ chars, mixed case).
+#   2. Compute: printf "YOUR_API_KEY:x" | base64
+#   3. Create the snippet (filename matters — must end in .snippet so
+#      the wildcard `include` in nginx.conf picks it up; this example
+#      file is named .example so it does NOT match the glob):
+#        echo 'proxy_set_header Authorization "Basic <BASE64>";' \
+#          > deploy/bugherd-auth.snippet
+#   4. Reload nginx:
+#        docker exec ai-zhlearn nginx -t && \
+#          docker exec ai-zhlearn nginx -s reload
+#
+# The real snippet file (deploy/bugherd-auth.snippet) is gitignored
+# — your API key never lands in the repo. The container picks it up
+# via the existing deploy/ bind-mount.
+
+proxy_set_header Authorization "Basic BASE64_VALUE";
