@@ -152,6 +152,10 @@
       <p class="ov-bh-tasks__sub">Klick auf einen Task → Details. Der <strong>„Prompt kopieren"</strong>-Button erzeugt einen vollständigen Claude-Code-Prompt mit Page, CSS-Selector, Screenshot-URL und Architektur-Regeln. In eine frische <code>claude</code>-Session einfügen.</p>
       <div class="ov-task__filter">
         <input type="text" id="ov-task-search" placeholder="Filter: Page, Beschreibung, BH-ID …" />
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ov-text-soft);white-space:nowrap;cursor:pointer;">
+          <input type="checkbox" id="ov-task-include-done" />
+          Erledigte zeigen
+        </label>
         <span id="ov-task-count"></span>
       </div>
       <div id="ov-task-list"><div class="ov-task ov-task--loading">Lade Bugherd-Tasks …</div></div>
@@ -331,9 +335,12 @@
     }
 
     // ---- Bugherd ----
+    // No status filter — Bugherd's API silently ignores comma-separated
+    // status values and returns zero. Pull everything that isn't
+    // deleted/archived, then let the UI filter `done` out by default.
     async function loadBugherd() {
       try {
-        const listRes = await fetch('/api/bugherd/projects/522520/tasks.json?status=feedback,backlog,todo,doing', { cache: 'no-cache' });
+        const listRes = await fetch('/api/bugherd/projects/522520/tasks.json', { cache: 'no-cache' });
         // 401 = missing/bad key; 500 = Bugherd Rails error on no auth;
         // 400 = CF rejects malformed auth. Treat any non-200 as
         // "not yet configured" so the page still works as a flow doc.
@@ -346,16 +353,24 @@
         if (!listRes.ok) throw new Error('HTTP ' + listRes.status);
         const listData = await listRes.json();
         const tasks = (listData && listData.tasks) || [];
-        totalOpen = tasks.length;
+        // "Open" = anything not done/closed. The list endpoint already
+        // omits deleted tasks; we filter `done` ourselves.
+        const openTasks = tasks.filter(t => {
+          const s = (t.status || '').toLowerCase();
+          return s !== 'done' && s !== 'closed';
+        });
+        totalOpen = openTasks.length;
+        const totalAll = tasks.length;
+        const doneCount = totalAll - totalOpen;
 
         // Render the summary strip immediately so the user sees the
         // total without waiting for per-task detail fetches.
-        bhCount.textContent = `Bugherd: ${totalOpen} offen`;
+        bhCount.textContent = `Bugherd: ${totalOpen} offen` + (doneCount ? ` · ${doneCount} erledigt` : '');
         bhCount.classList.remove('ov-badge--warn');
         bhCount.classList.add(totalOpen ? 'ov-badge--bad' : 'ov-badge--ok');
         bhSummary.innerHTML = `
           <span class="ov-bh__icon" style="background:${totalOpen ? '#b00020' : '#1e7f3a'}">${totalOpen}</span>
-          <span class="ov-bh__text"><strong>${totalOpen}</strong> offene Bugherd-Tasks, lade Page-Zuordnung…</span>
+          <span class="ov-bh__text"><strong>${totalOpen}</strong> offene Bugherd-Tasks${doneCount ? ` (+ ${doneCount} erledigt)` : ''}, lade Page-Zuordnung…</span>
           <a class="ov-bh__cta" href="https://www.bugherd.com/projects/522520" target="_blank" rel="noopener">Im Bugherd ↗</a>
         `;
 
@@ -373,6 +388,12 @@
         for (let i = 0; i < tasks.length; i++) {
           const t = tasks[i];
           const d = detail[i] && detail[i].task;
+          if (d) allTaskDetails.push(d);
+          // Page-card 🐞 badges only count OPEN tasks; done ones live
+          // in the triage section (toggleable) but shouldn't inflate
+          // the per-page count.
+          const status = (t.status || '').toLowerCase();
+          if (status === 'done' || status === 'closed') continue;
           const pagePath = (d && d.url) || '';
           const m = pagePath.match(/\/?([^\/?#]+\.html)(?:[?#].*)?$/);
           const file = m ? m[1] : '(root)';
@@ -384,13 +405,12 @@
             admin_link: (d && d.admin_link) || `https://www.bugherd.com/projects/522520/tasks/${t.local_task_id}`,
           });
           tasksByFile.set(file, arr);
-          if (d) allTaskDetails.push(d);
         }
 
         const filesWithBugs = [...tasksByFile.keys()].filter(f => f !== '(root)');
         bhSummary.innerHTML = `
           <span class="ov-bh__icon" style="background:${totalOpen ? '#b00020' : '#1e7f3a'}">${totalOpen}</span>
-          <span class="ov-bh__text"><strong>${totalOpen}</strong> offene Bugherd-Tasks, verteilt auf <strong>${filesWithBugs.length}</strong> Page(s).</span>
+          <span class="ov-bh__text"><strong>${totalOpen}</strong> offene Bugherd-Tasks${doneCount ? ` (+ ${doneCount} erledigt)` : ''}, verteilt auf <strong>${filesWithBugs.length}</strong> Page(s).</span>
           <a class="ov-bh__cta" href="https://www.bugherd.com/projects/522520" target="_blank" rel="noopener">Im Bugherd ↗</a>
         `;
         renderSections();
@@ -407,20 +427,32 @@
     const taskListEl = document.getElementById('ov-task-list');
     const taskCountEl = document.getElementById('ov-task-count');
     const taskSearchEl = document.getElementById('ov-task-search');
+    const includeDoneEl = document.getElementById('ov-task-include-done');
 
     function renderTaskList() {
       if (!allTaskDetails.length) {
-        taskListEl.innerHTML = '<div class="ov-task ov-task--loading">Keine offenen Tasks.</div>';
+        taskListEl.innerHTML = '<div class="ov-task ov-task--loading">Keine Tasks geladen.</div>';
         taskCountEl.textContent = '';
         return;
       }
+      const includeDone = !!(includeDoneEl && includeDoneEl.checked);
       // Sort: roughly newest first (descending local_task_id).
       const sorted = [...allTaskDetails].sort((a, b) => (b.local_task_id || 0) - (a.local_task_id || 0));
+      const statusFiltered = includeDone
+        ? sorted
+        : sorted.filter(t => (t.status || '').toLowerCase() !== 'done' && (t.status || '').toLowerCase() !== 'closed');
       const q = (taskSearchEl.value || '').trim().toLowerCase();
       const filtered = q
-        ? sorted.filter(t => taskSearchable(t).includes(q))
-        : sorted;
-      taskCountEl.textContent = q ? `${filtered.length} / ${sorted.length}` : `${sorted.length} Task(s)`;
+        ? statusFiltered.filter(t => taskSearchable(t).includes(q))
+        : statusFiltered;
+      const doneCount = sorted.length - sorted.filter(t => (t.status || '').toLowerCase() !== 'done' && (t.status || '').toLowerCase() !== 'closed').length;
+      taskCountEl.textContent = q
+        ? `${filtered.length} / ${statusFiltered.length} sichtbar` + (doneCount && !includeDone ? ` · ${doneCount} erledigt ausgeblendet` : '')
+        : `${filtered.length} Task(s)` + (doneCount && !includeDone ? ` · ${doneCount} erledigt ausgeblendet` : '');
+      if (!filtered.length) {
+        taskListEl.innerHTML = `<div class="ov-task ov-task--loading">Keine Tasks${q ? ' für diesen Filter' : ''}.</div>`;
+        return;
+      }
       taskListEl.innerHTML = filtered.map(renderTask).join('');
       attachTaskHandlers();
     }
@@ -446,8 +478,13 @@
       const reporter = (t.requester && t.requester.display_name) || t.requester_email || '—';
       const created = t.created_at ? new Date(t.created_at).toLocaleString('de-CH') : '—';
       const adminLink = t.admin_link || `https://www.bugherd.com/projects/522520/tasks/${id}`;
+      const status = (t.status || '').toLowerCase();
+      const statusColor = status === 'done' || status === 'closed' ? 'var(--ov-good)'
+                          : status === 'doing' ? 'var(--ov-accent)'
+                          : status === 'todo' ? 'var(--ov-warn)'
+                          : 'var(--ov-text-soft)';
       return `
-        <article class="ov-task" data-id="${esc(String(id))}">
+        <article class="ov-task" data-id="${esc(String(id))}" data-status="${esc(status)}">
           <div class="ov-task__head">
             <span class="ov-task__id">BH-${esc(String(id))}</span>
             <div class="ov-task__title-wrap">
@@ -456,7 +493,7 @@
                 <span>📄 ${esc(pageFile)}</span>
                 <span>👤 ${esc(reporter)}</span>
                 <span>🕒 ${esc(created)}</span>
-                <span>${esc(t.status || '—')}</span>
+                <span style="color:${statusColor};font-weight:900;">● ${esc(t.status || '—')}</span>
               </div>
             </div>
             <span class="ov-task__chev">▸</span>
@@ -617,6 +654,9 @@
 
     if (taskSearchEl) {
       taskSearchEl.addEventListener('input', renderTaskList);
+    }
+    if (includeDoneEl) {
+      includeDoneEl.addEventListener('change', renderTaskList);
     }
 
     renderSections();
