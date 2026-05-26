@@ -205,6 +205,46 @@
     return steps.find(s => s.files.includes(f)) || null;
   }
 
+  // ------- dead-link intercept + toast ---------------------------------
+
+  function isDeadLink(el) {
+    if (!el || el.tagName !== 'A') return false;
+    if (el.closest('#wiz-root')) return false;        // never our chrome
+    if (el.closest('[data-wiz-allow]')) return false; // explicit opt-out
+    const href = el.getAttribute('href');
+    if (href === null) return true;
+    if (href === '' || href === '#') return true;
+    if (/^javascript:/i.test(href)) return true;
+    return false;
+  }
+
+  function showToast(message) {
+    const root = state.ui && state.ui.root;
+    if (!root) return;
+    let stack = root.querySelector('#wiz-toast-stack');
+    if (!stack) {
+      stack = document.createElement('div');
+      stack.id = 'wiz-toast-stack';
+      root.appendChild(stack);
+    }
+    // cap at 3 visible — drop oldest first
+    const live = stack.querySelectorAll('.wiz-toast');
+    for (let i = 0; i <= live.length - 3; i++) live[i].remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'wiz-toast';
+    toast.textContent = message;
+    toast.addEventListener('click', () => dismissToast(toast));
+    stack.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('wiz-toast--shown'));
+    setTimeout(() => dismissToast(toast), 3000);
+  }
+  function dismissToast(toast) {
+    if (!toast.isConnected) return;
+    toast.classList.remove('wiz-toast--shown');
+    setTimeout(() => toast.remove(), 180);
+  }
+
   // ------- DOM construction --------------------------------------------
 
   function buildChrome() {
@@ -541,6 +581,19 @@
       if (state.ui.logo.contains(e.target)) return;
       setPanelState(false);
     });
+
+    // Dead-link interceptor: catch upstream <a> tags with no real
+    // destination (href="#" / "" / "javascript:" / missing) and show a
+    // toast instead of leaving stakeholders on a silent non-event.
+    // Capture phase so we run before any in-page handlers; skip our
+    // own chrome and anything explicitly opted out via data-wiz-allow.
+    document.addEventListener('click', (e) => {
+      const link = e.target && e.target.closest && e.target.closest('a');
+      if (!isDeadLink(link)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      showToast('Diese Funktion ist nicht Teil der ZK09-Bewertung');
+    }, true);
 
     // Clean up storage keys that are no longer used (current step is now
     // implied by location.pathname).

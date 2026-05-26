@@ -70,6 +70,29 @@ If `docker compose up -d` was never run after the host reboot, run it
 once — the `restart: unless-stopped` policy then keeps the container
 alive across reboots.
 
+## Bugherd workflow (project 522520)
+
+Bugherd issues against the live site flow into a structured Claude
+Code prompt via `tools/bugherd.sh`. Get an API key at
+`https://www.bugherd.com/settings/api`, then:
+
+```sh
+export BUGHERD_API_KEY=your_key_here
+./tools/bugherd.sh list           # open tasks as markdown
+./tools/bugherd.sh task 12345     # raw JSON for one task
+./tools/bugherd.sh prompt 12345   # ready-to-paste Claude Code prompt
+```
+
+The prompt template at `tools/bugherd-fix-prompt.md` carries the
+"don't touch upstream, scope CSS to #wiz-root, smallest diff"
+constraints so any fresh `claude` session inherits the rules.
+
+## Demo flows (ZK09 Bid Use Cases)
+
+`FLOWS.md` (repo root) maps the bid's §3 Live-Demo use cases to the
+existing prototype pages, calls out what's missing, and lists pre-
+demo actions. Keep it in sync as pages are added/changed.
+
 ## Healthchecks
 
 - `https://zhlearn.ai.srmedia.ch/healthz` → `ok`
