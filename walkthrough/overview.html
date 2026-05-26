@@ -333,6 +333,7 @@
     function escape(s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
+    const esc = escape; // alias used by the Bugherd-task render code below
 
     // ---- Bugherd ----
     // No status filter — Bugherd's API silently ignores comma-separated
