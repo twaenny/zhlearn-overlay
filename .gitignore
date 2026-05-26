@@ -7,3 +7,6 @@ Thumbs.db
 # Local env overrides for the compose file (none today, leave room)
 deploy/.env
 deploy/.env.local
+
+# Bugherd API key (real snippet; .example is committed)
+deploy/bugherd-auth.snippet

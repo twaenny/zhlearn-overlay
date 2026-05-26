@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZHlearn · Bid §3 Demo-Flow Übersicht</title>
+  <link rel="icon" href="/build/favicon-48.png" />
+  <link rel="stylesheet" href="/colors_and_type.css" />
+  <style>
+    :root {
+      --ov-bg: #f4f4f4;
+      --ov-panel: #ffffff;
+      --ov-rail: rgba(13, 17, 23, 0.12);
+      --ov-text: #0d1117;
+      --ov-text-soft: #4a4a4a;
+      --ov-accent: #0070b4;
+      --ov-accent-soft: #d6e9f6;
+      --ov-accent-dark: #003e6e;
+      --ov-good: #1e7f3a;
+      --ov-warn: #b06400;
+      --ov-bad: #b00020;
+      --ov-shadow: 0 2px 10px rgba(13, 17, 23, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--ov-bg);
+      color: var(--ov-text);
+      line-height: 1.5;
+    }
+    .ov-shell { max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px; }
+    .ov-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+    .ov-head h1 { margin: 0; font-weight: 900; font-size: 26px; letter-spacing: -0.015em; }
+    .ov-head__sub { color: var(--ov-text-soft); font-size: 13px; }
+    .ov-head__sub a { color: var(--ov-accent); }
+    .ov-toolbar { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--ov-text-soft); }
+    .ov-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: var(--ov-panel); border: 1px solid var(--ov-rail); font-size: 11px; font-weight: 900; }
+    .ov-badge--ok    { color: var(--ov-good); border-color: var(--ov-good); }
+    .ov-badge--warn  { color: var(--ov-warn); border-color: var(--ov-warn); }
+    .ov-badge--bad   { color: var(--ov-bad);  border-color: var(--ov-bad); }
+    .ov-badge--mono  { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-weight: 400; text-transform: none; }
+
+    /* Bugherd overall status strip */
+    .ov-bh { background: var(--ov-panel); border: 1px solid var(--ov-rail); border-radius: 2px; padding: 14px 18px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; box-shadow: var(--ov-shadow); }
+    .ov-bh__icon { width: 28px; height: 28px; border-radius: 999px; background: var(--ov-accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; }
+    .ov-bh__text { flex: 1; font-size: 13px; color: var(--ov-text-soft); }
+    .ov-bh__text strong { color: var(--ov-text); }
+    .ov-bh__cta { color: var(--ov-accent); font-size: 12px; text-decoration: none; }
+    .ov-bh__cta:hover { text-decoration: underline; }
+
+    /* Use-case section */
+    .ov-section { background: var(--ov-panel); border: 1px solid var(--ov-rail); border-radius: 2px; padding: 22px 24px 18px; margin-bottom: 22px; box-shadow: var(--ov-shadow); }
+    .ov-section__head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+    .ov-section__num { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; color: var(--ov-text-soft); }
+    .ov-section__title { font-weight: 900; font-size: 18px; letter-spacing: -0.01em; margin: 0; }
+    .ov-section__sub { margin: 0 0 14px; color: var(--ov-text-soft); font-size: 13px; }
+
+    .ov-sub { margin: 16px 0 10px; }
+    .ov-sub__title { font-weight: 900; font-size: 13.5px; margin: 0 0 8px; color: var(--ov-text); }
+    .ov-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+    .ov-card { display: block; padding: 12px 14px; border: 1px solid var(--ov-rail); border-radius: 2px; text-decoration: none; color: inherit; background: #fcfcfc; transition: border-color 120ms, transform 120ms; }
+    .ov-card:hover { border-color: var(--ov-accent); transform: translateY(-1px); }
+    .ov-card__row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .ov-card__title { font-weight: 900; font-size: 13px; line-height: 1.3; }
+    .ov-card__file { display: block; margin-top: 4px; font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 11px; color: var(--ov-text-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ov-card__badges { display: flex; gap: 4px; flex-shrink: 0; }
+    .ov-card__pill { font-size: 9.5px; padding: 2px 6px; border-radius: 2px; font-weight: 900; letter-spacing: 0.02em; text-transform: uppercase; }
+    .ov-card__pill--wiz   { background: var(--ov-accent-soft); color: var(--ov-accent-dark); }
+    .ov-card__pill--orph  { background: rgba(176, 100, 0, 0.15); color: var(--ov-warn); }
+    .ov-card__pill--bh    { background: rgba(176, 0, 32, 0.10); color: var(--ov-bad); }
+
+    .ov-missing { padding: 12px 14px; border: 1px dashed var(--ov-rail); border-radius: 2px; background: rgba(176, 100, 0, 0.05); }
+    .ov-missing__title { display: block; font-weight: 900; font-size: 12.5px; color: var(--ov-warn); }
+    .ov-missing__sub { font-size: 12px; color: var(--ov-text-soft); }
+
+    /* Bug list per card (collapsible) */
+    .ov-bugs { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--ov-rail); display: none; font-size: 11.5px; }
+    .ov-card[data-bh-open="true"] .ov-bugs { display: block; }
+    .ov-bug { margin: 4px 0; padding-left: 6px; border-left: 2px solid var(--ov-bad); color: var(--ov-text-soft); }
+    .ov-bug strong { color: var(--ov-text); }
+
+    @media (max-width: 720px) {
+      .ov-shell { padding: 20px 14px 60px; }
+      .ov-head h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="ov-shell">
+    <header class="ov-head">
+      <div>
+        <h1>ZHlearn · Bid §3 Demo-Flow Übersicht</h1>
+        <p class="ov-head__sub">Live-Stand für die ZK09-Bewertung — basiert auf <a href="/FLOWS.md">FLOWS.md</a> · <a href="/DEMO-FLOW.md">DEMO-FLOW.md</a></p>
+      </div>
+      <div class="ov-toolbar">
+        <span class="ov-badge ov-badge--mono" id="ov-bh-count">Bugherd: lade…</span>
+        <a class="ov-bh__cta" href="https://www.bugherd.com/projects/522520" target="_blank" rel="noopener">Bugherd öffnen ↗</a>
+      </div>
+    </header>
+
+    <div class="ov-bh" id="ov-bh-summary">
+      <span class="ov-bh__icon">🐞</span>
+      <span class="ov-bh__text">Bugherd-Daten werden geladen…</span>
+    </div>
+
+    <div id="ov-sections"></div>
+
+    <p style="margin-top:32px; color: var(--ov-text-soft); font-size: 11px; text-align: center;">
+      Wizard-Overlay aktiv auf allen Prototyp-Seiten (Logo links unten). · Auto-Refresh alle 60 s.
+    </p>
+  </main>
+
+  <script>
+    // Single source of truth: the bid §3 use cases + their page map.
+    // Mirrors FLOWS.md. Status flags drive the badges.
+    const USE_CASES = [
+      {
+        num: '1', title: 'Nutzerverwaltung',
+        sub: 'Bid §3 — Rollen, Berechtigungen, Profile (intern + extern)',
+        bullets: [
+          { title: '1.1 Verwaltung von Rollen und Berechtigungen', cards: [
+            { title: 'Rollen & Berechtigungen', file: 'rollen-berechtigungen.html', wiz: false },
+            { title: 'Rolle bearbeiten', file: 'rolle-bearbeiten.html', wiz: false },
+          ]},
+          { title: '1.2 Anzeige Doppelrollen / Mehrfachanstellung', cards: [
+            { title: 'Nutzerübersicht', file: 'nutzeruebersicht.html', wiz: false },
+            { title: 'Nutzerprofil Detail', file: 'nutzerprofil-detail.html', wiz: false, note: 'Zeigt Doppelrolle + Mehrfachanstellung' },
+          ]},
+          { title: '1.3 Erstellung von Nutzerprofilen (intern + extern)', cards: [
+            { title: 'Nutzer anlegen — intern', file: 'nutzer-anlegen-intern.html', wiz: false },
+            { title: 'Nutzer anlegen — extern', file: 'nutzer-anlegen-extern.html', wiz: false },
+          ]},
+        ],
+        gap: 'Wizard-Gruppe 1 ist heute leer — alle 6 Pages existieren, aber DEMO-FLOW.md hat keine Steps dafür. Reviewer können sie via Wizard nicht erreichen.',
+      },
+      {
+        num: '2', title: 'Erstellungs- und Publikationsprozess',
+        sub: 'Bid §3 — Vorlagen, Inhalt, Übersicht, Publikation, Freigabe',
+        bullets: [
+          { title: '2.1 Vorlagen erstellen & bearbeiten', cards: [
+            { title: 'Vorlagen Übersicht', file: 'vorlagen-uebersicht.html', wiz: true, step: '10' },
+            { title: 'Vorlage bearbeiten', file: 'vorlage-bearbeiten.html', wiz: false, note: 'Drill-Down von Step 10' },
+          ]},
+          { title: '2.2 Angebote inkl. Inhalt erfassen', cards: [
+            { title: 'Angebot erfassen', file: 'angebot-erfassen.html', wiz: true, step: '11' },
+            { title: 'Lerneditor light', file: 'lerneditor-light.html', wiz: false, note: 'Drill-Down von Step 10' },
+          ]},
+          { title: '2.3 Übersicht aller Angebote', cards: [
+            { title: 'Angebote Übersicht', file: 'angebote-uebersicht.html', wiz: true, step: '9' },
+          ]},
+          { title: '2.4 Publikation, Terminierung, Freigabe', cards: [
+            { title: 'Publikation & Terminierung', file: 'publikation-terminierung.html', wiz: true, step: '12' },
+            { title: 'Freigabeprozess', file: 'freigabeprozess.html', wiz: true, step: '13' },
+          ]},
+        ],
+      },
+      {
+        num: '3', title: 'Verwaltung bestehender Angebote',
+        sub: 'Bid §3 — Teilnehmerlisten, Benachrichtigung',
+        bullets: [
+          { title: '3.1 Teilnehmerlisten exportieren und editieren', cards: [
+            { title: 'Teilnehmerliste — Angebot', file: 'teilnehmerliste-angebot.html', wiz: true, step: '14', note: 'Export .xlsx/.csv + Edit-Aktionen' },
+          ]},
+          { title: '3.2 Benachrichtigung der Teilnehmenden', cards: [
+            { title: 'Teilnehmerliste — Angebot', file: 'teilnehmerliste-angebot.html', wiz: true, step: '14', note: '„E-Mail senden" Button' },
+            { title: 'Teilnehmende Übersicht', file: 'teilnehmende-uebersicht.html', wiz: true, step: '15' },
+          ]},
+        ],
+      },
+      {
+        num: '4', title: 'Anmeldeprozess',
+        sub: 'Bid §3 — interne + externe Anmeldung, Eintrittskontrolle',
+        bullets: [
+          { title: '4.1 Anmeldung / Bestätigung / Abmeldung (intern)', cards: [
+            { title: 'Lernplatz', file: 'lernplatz.html', wiz: true, step: '1' },
+            { title: 'Angebot-Detail', file: 'angebot-detail.html', wiz: true, step: '2', note: '5 Anmelde-Varianten' },
+            { title: 'Mein Lernen', file: 'mein-lernen.html', wiz: true, step: '3' },
+            { title: 'Mobile Anmelden', file: 'mobile-anmelden.html', wiz: true, step: '4' },
+          ]},
+          { title: '4.2 Kostenpflichtige Anmeldung (extern)', cards: [
+            { title: 'Webshop Katalog', file: 'webshop-katalog.html', wiz: true, step: '5' },
+            { title: 'Webshop Detail', file: 'webshop-detail.html', wiz: true, step: '6' },
+            { title: 'Webshop Checkout', file: 'webshop-checkout.html', wiz: true, step: '7', note: '4-Step Wizard inkl. 2FA' },
+            { title: 'Webshop Bestätigung', file: 'webshop-bestaetigung.html', wiz: true, step: '8' },
+          ]},
+          { title: '4.3 Eintrittskontrolle Smartphone-App, GoShows', cards: [
+            { title: '(keine TS — laut Bid)', missing: true, note: 'Wird nur als Roadmap erwähnt' },
+          ]},
+        ],
+      },
+      {
+        num: '5', title: 'Dashboard und Gamification',
+        sub: 'Bid §3 — Dashboards, Empfehlungen, Lernpfade, Gamification, Social',
+        bullets: [
+          { title: '5.1 Dashboard-Ansichten für unterschiedliche Rollen', cards: [
+            { title: 'Mein Lernen (Learner-Dashboard)', file: 'mein-lernen.html', wiz: true, step: '3', note: 'IST das Learner-Dashboard' },
+            { title: 'Admin-Dashboard', missing: true, note: 'Page fehlt — Mockup oder verbal' },
+          ]},
+          { title: '5.2 Personalisierte Empfehlungen', cards: [
+            { title: 'Lernplatz', file: 'lernplatz.html', wiz: true, step: '1', note: 'Tooltip + „Empfehlung"-Sort + Social-Signal' },
+          ]},
+          { title: '5.3 Persönliche Lernpfade', cards: [
+            { title: 'Mein Lernen (Lernpfad-Anzeige)', file: 'mein-lernen.html', wiz: true, step: '3', note: '„Digitale Transformation Grundlagen — Lernpfad 4 Module"' },
+            { title: 'Lernpfad-Editor', missing: true, note: 'Page fehlt — Admin baut Pfade aus Modulen' },
+          ]},
+          { title: '5.4 Gamification (Punkte, Badges, Leaderboards)', cards: [
+            { title: 'Mein Lernen (Punkte + Badges)', file: 'mein-lernen.html', wiz: true, step: '3', note: '„1247 Punkte", „Mai-Badge"' },
+            { title: 'Leaderboard', missing: true, note: 'Page fehlt — nur als Permission-Eintrag erwähnt' },
+          ]},
+          { title: '5.5 Social-Learning (Teilen, Likes, Kommentare)', cards: [
+            { title: 'Mein Lernen („Empfehlen", „Teilen")', file: 'mein-lernen.html', wiz: true, step: '3' },
+            { title: 'Angebot-Detail (Share-Button)', file: 'angebot-detail.html', wiz: true, step: '2' },
+            { title: 'Social-Learning-Hub', missing: true, note: 'Likes, Kommentare, Lernpfade als Social — fehlt' },
+          ]},
+        ],
+        gap: 'Wizard-Steps 16+17 sind Roadmap-only. Aber: viel Use-Case-5-Substanz ist BEREITS auf mein-lernen + lernplatz sichtbar — DEMO-FLOW.md könnte das prominenter benennen.',
+      },
+    ];
+
+    // ---- render ----
+    const sectionsEl = document.getElementById('ov-sections');
+    const bhCount = document.getElementById('ov-bh-count');
+    const bhSummary = document.getElementById('ov-bh-summary');
+    const tasksByFile = new Map();    // 'lernplatz.html' → [{id, title, url}]
+    let totalOpen = 0;
+
+    function renderSections() {
+      sectionsEl.innerHTML = '';
+      for (const uc of USE_CASES) {
+        const section = document.createElement('section');
+        section.className = 'ov-section';
+        section.id = 'uc-' + uc.num;
+        let html = `
+          <div class="ov-section__head">
+            <span class="ov-section__num">Use Case ${uc.num}</span>
+            <h2 class="ov-section__title">${uc.title}</h2>
+          </div>
+          <p class="ov-section__sub">${uc.sub}</p>
+        `;
+        for (const sub of uc.bullets) {
+          html += `<div class="ov-sub"><h3 class="ov-sub__title">${sub.title}</h3><div class="ov-cards">`;
+          for (const c of sub.cards) html += renderCard(c);
+          html += `</div></div>`;
+        }
+        if (uc.gap) {
+          html += `<div class="ov-missing" style="margin-top:14px"><span class="ov-missing__title">Lücke</span><span class="ov-missing__sub"> · ${uc.gap}</span></div>`;
+        }
+        section.innerHTML = html;
+        sectionsEl.appendChild(section);
+      }
+    }
+
+    function renderCard(c) {
+      if (c.missing) {
+        return `<div class="ov-missing"><span class="ov-missing__title">${c.title}</span><br><span class="ov-missing__sub">${c.note || ''}</span></div>`;
+      }
+      const wizPill   = c.wiz   ? `<span class="ov-card__pill ov-card__pill--wiz" title="Im Wizard sichtbar als Step ${c.step}">Step ${c.step}</span>` : `<span class="ov-card__pill ov-card__pill--orph" title="Nicht im Wizard">offline</span>`;
+      const bugs = tasksByFile.get(c.file) || [];
+      const bhPill = bugs.length ? `<span class="ov-card__pill ov-card__pill--bh" title="${bugs.length} Bugherd-Issue(s)">🐞 ${bugs.length}</span>` : '';
+      const bugList = bugs.length ? `<div class="ov-bugs">${bugs.map(b => `<div class="ov-bug"><strong>BH-${b.id}</strong> · ${escape(b.title)}</div>`).join('')}</div>` : '';
+      const dataAttr = bugs.length ? ' data-bh-open="true"' : '';
+      const noteRow = c.note ? `<div style="margin-top:6px; font-size: 11.5px; color: var(--ov-text-soft);">${escape(c.note)}</div>` : '';
+      return `
+        <a class="ov-card" href="/${c.file}"${dataAttr}>
+          <div class="ov-card__row">
+            <span class="ov-card__title">${c.title}</span>
+            <span class="ov-card__badges">${wizPill}${bhPill}</span>
+          </div>
+          <span class="ov-card__file">${c.file}</span>
+          ${noteRow}
+          ${bugList}
+        </a>
+      `;
+    }
+
+    function escape(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ---- Bugherd ----
+    async function loadBugherd() {
+      try {
+        const res = await fetch('/api/bugherd/projects/522520/tasks.json?status=feedback,backlog,todo,doing', { cache: 'no-cache' });
+        // Bugherd's API returns 401 for missing key + 500 for no auth
+        // header at all (Rails session quirk); CF 400s on malformed
+        // base64. Treat any non-success as "API not yet configured".
+        if (res.status === 401 || res.status === 500 || res.status === 400) {
+          bhCount.textContent = 'Bugherd: nicht konfiguriert';
+          bhCount.classList.add('ov-badge--warn');
+          bhSummary.innerHTML = '<span class="ov-bh__icon" style="background:#b06400">!</span><span class="ov-bh__text">Bugherd-API ist nicht konfiguriert. Setup-Hinweise in <code>deploy/bugherd-auth.snippet.example</code>.</span>';
+          return;
+        }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const tasks = (data && data.tasks) || [];
+        totalOpen = tasks.length;
+        tasksByFile.clear();
+        for (const t of tasks) {
+          const url = t.site || t.url || '';
+          const m = url.match(/\/([^\/?#]+\.html)(?:[?#].*)?$/);
+          const file = m ? m[1] : '(root)';
+          const arr = tasksByFile.get(file) || [];
+          arr.push({ id: t.local_task_id || t.id, title: (t.description || '').slice(0, 140), url });
+          tasksByFile.set(file, arr);
+        }
+        bhCount.textContent = `Bugherd: ${totalOpen} offen`;
+        bhCount.classList.remove('ov-badge--warn');
+        bhCount.classList.add(totalOpen ? 'ov-badge--bad' : 'ov-badge--ok');
+        const filesWithBugs = [...tasksByFile.keys()].filter(f => f !== '(root)');
+        bhSummary.innerHTML = `
+          <span class="ov-bh__icon" style="background:${totalOpen ? '#b00020' : '#1e7f3a'}">${totalOpen}</span>
+          <span class="ov-bh__text"><strong>${totalOpen}</strong> offene Bugherd-Tasks, verteilt auf <strong>${filesWithBugs.length}</strong> Page(s).</span>
+          <a class="ov-bh__cta" href="https://www.bugherd.com/projects/522520" target="_blank" rel="noopener">Im Bugherd ↗</a>
+        `;
+        renderSections();
+      } catch (err) {
+        bhCount.textContent = 'Bugherd: Fehler';
+        bhCount.classList.add('ov-badge--bad');
+        bhSummary.innerHTML = `<span class="ov-bh__icon" style="background:#b00020">!</span><span class="ov-bh__text">Bugherd-Abruf fehlgeschlagen: ${escape(String(err))}</span>`;
+      }
+    }
+
+    renderSections();
+    loadBugherd();
+    setInterval(loadBugherd, 60_000);
+  </script>
+</body>
+</html>
