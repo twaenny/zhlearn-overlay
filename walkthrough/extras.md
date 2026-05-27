@@ -156,76 +156,161 @@ Mitarbeitende). Manuelle Eingabe + E-Mail-Verifikation + 2FA-Hinweis.
 
 ---
 
-## 2 · Use Case 2 · Erstellung (Lücken-Stubs)
+## 2 · Use Case 2 · Erstellung — Anschluss-Pages
 
 ### Step a1 · `angebot-bearbeiten.html` — Angebot bearbeiten
+
+**Persona** · Silvia Keller (Admin)
+**Award lens** · Lifecycle · Governance
 
 **What you're looking at**
 
 Admin-Edit für ein bereits publiziertes Angebot (z. B. „Resilienz im
 Berufsalltag"). Lückenfüller zwischen Erfassung (Step 11) und
-Publikation (Step 12).
+Publikation (Step 12) für den Edit-after-Publish-Pfad.
+
+**Notable interactions**
+
+- Status-Banner oben zeigt aktuellen Zustand (z. B. „Aktiv")
+- Felder editieren → Save löst Re-Approval-Bedarf aus (Vier-Augen
+  bei größeren Änderungen)
+- Versions-Vergleich vor / nach Edit
+
+**Design choices to evaluate**
+
+- Welche Edits brauchen Re-Approval, welche nicht?
+- Soll Edit-during-Aktiv-Phase Teilnehmer benachrichtigen?
 
 **Known limitations**
 
-Detailliertes Narrativ noch nicht erfasst — siehe Demo-Plan-PDF und
-ergänzen, sobald Frank die Variante final spezifiziert hat.
+- Versions-Historie heute Mockup, kein echtes Audit-Log.
 
 ---
 
-## 3 · Use Case 3 · Verwaltung (Lücken-Stubs)
+## 3 · Use Case 3 · Verwaltung — Anschluss-Pages
 
 ### Step v1 · `auswertungen.html` — Auswertungen
 
+**Persona** · Silvia Keller (Manager / Admin)
+**Award lens** · Reporting · Wirtschaftlichkeit
+
 **What you're looking at**
 
-Reporting-Dashboard mit Anmeldezahlen, Status-Verteilung,
-Wirtschaftlichkeit. Adressiert sowohl Bid 3.x (Reporting auf
-Angebots-Ebene) als auch 5.1 (Admin-KPI-Sicht).
+Reporting-Dashboard mit Anmeldezahlen pro Angebot, Status-
+Verteilung (Entwurf / Aktiv / Abgeschlossen / Archiviert) und
+Wirtschaftlichkeit (Kosten / Auslastung / No-Show-Rate). Adressiert
+Bid 3.x Reporting auf Angebots-Ebene; KPI-Streifen knüpft an
+Bid 5.1 (Admin-Dashboard) an.
+
+**Notable interactions**
+
+- Filter nach Zeitraum / Direktion / Lernkategorie
+- Drill-Down von einer Kennzahl auf die Teilnehmerliste
+  (`teilnehmerliste-angebot.html`)
+- Export als `.xlsx` / `.csv` (Pattern analog Step 14)
+
+**Design choices to evaluate**
+
+- Welche KPIs sind tagesfreundlich, welche sind Monats- /
+  Jahresberichte (vgl. Bid: Jahresplanung-Dashboard)?
+- Cross-Direktion-Aggregat vs. nur eigene Direktion?
 
 **Known limitations**
 
-Detail-Narrativ noch nicht erfasst — verbal als Reporting-Surface
-einführen, Cross-Drilldown auf Teilnehmerliste demonstrieren.
+- Jahresplanungs-Surface (eigene Page) noch nicht gebaut — siehe
+  Bid-Punkt §4.1.
 
 ---
 
-## 4 · Use Case 4 · Anmeldung (Lücken-Stubs)
+## 4 · Use Case 4 · Anmeldung — Anschluss-Pages
 
 ### Step l1 · `lernplatz-extern.html` — Lernplatz extern
+
+**Persona** · Annika Weiss (externe Nutzerin)
+**Award lens** · Discoverability · Externe Zielgruppen
 
 **What you're looking at**
 
 Discovery-Page speziell für externe Lernende — Komplement zu
-`lernplatz-intern.html` (Step 1). Spiegelung der Marc-Steiner-Journey
-für die Annika-Weiss-Persona.
+`lernplatz-intern.html` (Step 1). Sichtbare Unterschiede: kein
+Direktion-Filter, Preisangabe pro Angebot, klare „Jetzt buchen"-CTA
+statt „Anmelden", Hinweis auf Konto-Erstellung. Spiegelt die
+Annika-Weiss-Journey.
+
+**Notable interactions**
+
+- Filter nach Lernkategorie + Preis
+- Klick auf Angebots-Karte → führt in den Webshop-Flow
+  (Step 5 → 6 → 7 → 8)
+- Conversion-Hinweise (Termin / Plätze frei / Preis) bereits in der
+  Karte sichtbar
+
+**Design choices to evaluate**
+
+- Reicht ein gemeinsamer Lernplatz mit Persona-Strip oben, oder
+  sind die Listen-Inhalte zu unterschiedlich?
+- Trust-Signale (Logo KTZH, Trust-Badge) prominent genug?
 
 **Known limitations**
 
-Narrativ noch nicht ausformuliert; Reviewer kann beide Lernplatz-
-Varianten parallel vergleichen.
+- Externer-User-Account-Flow noch nicht durchgängig (Account-
+  Erstellung wird im Webshop-Checkout abgefangen, nicht hier).
 
 ### Step b1 · `meine-buchungen.html` — Meine Buchungen
+
+**Persona** · Annika Weiss (externe Nutzerin)
+**Award lens** · Externer Hub · Buchungs-Transparenz
 
 **What you're looking at**
 
 Buchungs-Historie für externe Nutzer (Pendant zu „Mein Lernen" für
 interne Lernende). Adressiert den im Bid genannten „Externer User
-Dashboard"-Punkt.
+Dashboard"-Punkt. Tabelle / Karten mit Status, Datum, Preis,
+Rechnungs-PDF-Link.
+
+**Notable interactions**
+
+- Re-Download Rechnung als PDF
+- Stornierung mit Hinweis auf Storno-Bedingungen
+- Folge-Buchung (gleicher Kurs erneut, neue Durchführung)
+
+**Design choices to evaluate**
+
+- Sollen externe User auch Lernpfade sehen (heute nicht), oder
+  bleibt das ein interner-User-Feature?
+- Wie tief geht „Mein Konto" — Profil-Edit hier oder separat?
 
 **Known limitations**
 
-Narrativ noch nicht ausformuliert.
+- Rechnungs-Download-Link heute Mockup, kein echter PDF-Endpoint.
 
 ### Step w1 · `webshop-2fa-setup.html` — Webshop · 2FA-Setup
 
+**Persona** · Annika Weiss (externe Nutzerin, erstmalige Anmeldung)
+**Award lens** · Sicherheit · Compliance
+
 **What you're looking at**
 
-Zwei-Faktor-Setup-Flow im Webshop-Checkout. Klein, fokussiert.
+Zwei-Faktor-Setup-Flow im Webshop-Checkout — App-basiert (TOTP)
+oder SMS. Kleiner, fokussierter Flow, der zwischen
+`webshop-checkout.html` (Step 7) und der finalen Bestätigung
+ausgelöst wird. Erfüllt Bid 4.2 (2FA für kostenpflichtige
+externe Anmeldungen).
+
+**Notable interactions**
+
+- Methodenwahl (TOTP / SMS) mit Erklärungs-Tooltip
+- QR-Code für Authenticator-App scannen
+- 6-stelligen Code eingeben → Bestätigung
+
+**Design choices to evaluate**
+
+- 2FA ab Kostenpflichtigkeit erforderlich oder optional?
+- Wiederholungs-Pflicht (jeder Checkout vs. einmalig)?
 
 **Known limitations**
 
-Narrativ noch nicht ausformuliert.
+- Keine echte Token-Erzeugung; QR ist statisch.
 
 ---
 

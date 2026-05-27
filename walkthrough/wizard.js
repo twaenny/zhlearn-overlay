@@ -313,8 +313,8 @@
     }
 
     // Demo-plan PDF metadata: render priority / owner / status /
-    // duration as small mono chips. Each is optional — missing fields
-    // just skip their chip.
+    // duration / coverage as small mono chips. Each is optional —
+    // missing fields just skip their chip.
     const m = (state.demoMeta || {})[step.id];
     if (m) {
       if (m.subUC)    chips.push(`<span class="wiz-chip wiz-chip--bid" title="Bid §3 Use-Case">§3 · ${esc(m.subUC)}</span>`);
@@ -322,9 +322,31 @@
       if (m.owner)    chips.push(`<span class="wiz-chip wiz-chip--owner" title="Zuständig">👤 ${esc(m.owner)}</span>`);
       if (m.status)   chips.push(`<span class="wiz-chip ${statusClass(m.status)}" title="Status">${esc(m.status)}</span>`);
       if (m.minutes != null) chips.push(`<span class="wiz-chip wiz-chip--mono" title="Dauer">${esc(String(m.minutes))} min</span>`);
+      if (m.coverage === 'partial') chips.push(`<span class="wiz-chip wiz-chip--cov-partial" title="Audit: nur teilweise abgedeckt">⚠️ teilw.</span>`);
+      if (m.coverage === 'missing') chips.push(`<span class="wiz-chip wiz-chip--cov-missing" title="Audit: nicht im Prototyp gebaut">🚧 fehlt</span>`);
     }
 
     return chips.length ? `<div class="wiz-chips">${chips.join('')}</div>` : '';
+  }
+
+  function renderMetaCallouts(step) {
+    // Surface PDF-driven warnings (verbal-only roadmap items, demo
+    // hints) as prominent boxes BEFORE the narration sections, so
+    // the demo-driver sees them before reading the talking points.
+    const m = (state.demoMeta || {})[step.id];
+    if (!m) return '';
+    const out = [];
+    if (m.demoHint) {
+      out.push(`<div class="wiz-callout wiz-callout--hint" role="note">
+        <strong>Demo-Hinweis</strong> · ${inlineMd(m.demoHint)}
+      </div>`);
+    }
+    if (m.verbalRoadmap) {
+      out.push(`<div class="wiz-callout wiz-callout--roadmap" role="note">
+        <strong>Verbal als Roadmap erwähnen</strong> · ${inlineMd(m.verbalRoadmap)}
+      </div>`);
+    }
+    return out.join('');
   }
 
   function renderFileRow(step) {
@@ -374,6 +396,7 @@
       return `
         <div class="wiz-narration">
           ${renderChips(step)}
+          ${renderMetaCallouts(step)}
           ${renderFileRow(step)}
           <p style="margin-top:8px;color:var(--wiz-text-soft);font-size:12.5px;">
             Narration noch nicht erfasst. Demo-Kontext: siehe
@@ -386,6 +409,7 @@
     return `
       <div class="wiz-narration">
         ${renderChips(step)}
+        ${renderMetaCallouts(step)}
         ${renderFileRow(step)}
         ${renderNarrationSections(step)}
       </div>

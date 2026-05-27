@@ -1,280 +1,250 @@
-# ZHlearn — Demo-Flow Plan (ZK09 Live-Demo)
+# ZHlearn — Demo-Flow Plan + ZK09-Audit (Stand 2026-05-27)
 
-Quelle: **§3 "Live-Demo folgender Use Cases"** des Pflichtenhefts.
-Letzte Aktualisierung: **2026-05-27**, nach Upstream-Push von Chris
-(36 Commits, 10 neue HTML-Seiten, `rollen-berechtigungen.html`
-überholt).
+Quelle: **§3 „Live-Demo folgender Use Cases"** des Pflichtenhefts,
+**`docs/Status - Tabellenblatt1.pdf`** (Demo-Plan-Status), Upstream-
+Specs (`DEMO-FLOW.md`, `WALKTHROUGH-ROUTES-ROLLEN.md`, `OPEN-QUESTIONS.md`,
+`pflichtenheft-extracted.md`).
+
+Demo-Deadline: **2026-05-31**. Gesamt-Demo-Dauer laut PDF: **88 min**
+(14 + 28 + 7 + 15 + 24).
 
 **Status-Symbole:**
 
-- ✅ Seite zeigt die Funktion — kann live demonstriert werden
-- ⚠️ Seite zeigt die Funktion teilweise — Lücke benennen
-- 🚧 Funktion fehlt im Prototyp — Roadmap oder Mini-Mockup
+- ✅ Page existiert UND zeigt die Funktion — direkt demonstrierbar
+- ⚠️ Page existiert, deckt aber nur Teil der Bid-Anforderung ab —
+  Lücke verbal als Roadmap erwähnen
+- 🚧 Funktion fehlt komplett im Prototyp — entweder Mini-Mockup oder
+  reine Roadmap-Erwähnung
 - 🔁 Inter-Page-Bridge fehlt — Wizard-Dropdown überbrückt
-- 🆕 Seit 2026-05-27 neu (war in der vorherigen FLOWS-Version 🚧)
+- 🆕 Neu seit 2026-05-27 (Upstream-Round)
 
-Wizard-Position: jede Seite trägt das schwebende KTZH-Logo links
-unten; im Panel sind die Use-Cases als Gruppen `1.` bis `5.` sichtbar
-— passt 1:1 zum Aufbau hier.
-
----
-
-## ✅ STAND DER LÜCKEN — was Chris diese Woche geliefert hat
-
-Diese Bid-Punkte waren in der vorherigen FLOWS-Version 🚧 und sind
-jetzt mit echten Prototyp-Seiten abgedeckt:
-
-| Bid-Punkt | Bid-Use-Case | Neue Seite |
-|---|---|---|
-| Admin-Dashboard (Rollen-spezifisch, KPI) | 5.1 | `manager-dashboard.html` (ZHlearn-Manager) |
-| Lernpfade / Kompetenzen | 5.3 | `kompetenzen.html` (Meine Entwicklung) |
-| Social-Learning-Hub | 5.5 | `social-wall.html` |
-| Externer User Dashboard | 5.1 | `meine-buchungen.html` |
-| 2FA-Setup im Checkout | 4.2 | `webshop-2fa-setup.html` |
-| Reporting / Auswertungen | 3 / 5.1 | `auswertungen.html` |
-| Admin-Edit für bestehende Angebote | 2.x | `angebot-bearbeiten.html` |
-| Lernplatz nach Persona getrennt | 4.1 | `lernplatz-intern.html` + `lernplatz-extern.html` |
-
-**Verbleibend 🚧:** Leaderboard-Screen (5.4) — nur als Permission-Eintrag
-auf `rollen-berechtigungen.html` erwähnt. Vorschlag: verbal als Roadmap.
+Demo-Hilfen, die im Wizard live verfügbar sind: Persona/Award-lens
+Chips, Bid-§3-Sub-UC-Chip, Demo-Priorität, Owner, Status, Dauer in
+Minuten, ⚠️-Coverage-Chip, „Demo-Hinweis" + „Verbal als Roadmap"
+Callouts (aus `walkthrough/demo-metadata.json`).
 
 ---
 
-## ⚠️ AKTUELLE STÖRUNGEN
+## 🚨 AUDIT-ERGEBNIS (2026-05-27)
 
-| Issue | Fix | Status |
+| Use-Case | Status | Was ist konkret das Problem? |
 |---|---|---|
-| `lernplatz.html` ist umbenannt → produktion war 404, Wizard-Step 1 broken | nginx-Redirect `/lernplatz.html` → `/lernplatz-intern.html` | ✅ live (overlay commit) |
-| Nutzerverwaltungs-Pages waren nicht im Wizard erreichbar | `EXTRA_STEPS` in `walkthrough/wizard.js` füllt Gruppe 1 (r1–r6) | ✅ live |
-| 10 neue Seiten waren nicht im Wizard erreichbar | `EXTRA_STEPS` füllt Gruppen 1, 2, 3, 4, 5 mit synthetischen Steps | ✅ live |
-| `mein-lernen_claude.html` (52K) existiert im Upstream | Unklarer Status — vermutlich ein versehentlich committetes Claude-Output | bei Chris klären |
+| **1 Nutzerverwaltung** | ✅ 6/6 demonstrierbar | Komplett wired, Narration in `extras.md`. Kein Handlungsbedarf. |
+| **2 Erstellung & Publikation** | ✅ 6/6 demonstrierbar | Existierende Steps 9–13 + neuer `a1` decken alle Bid-Punkte ab. |
+| **3 Verwaltung bestehender Angebote** | ⚠️ 2/3 ok, 1 partial | Step 15 „Benachrichtigung" hat nur Button, keine Vorlagen-getriebene Outbox. **Verbal:** Bid §8 Vorlagen-Taxonomie als Roadmap erwähnen. |
+| **4 Anmeldeprozess** | ✅ 4/4 demo-relevant ok | (4.3 GoShows „keine TS" lt. Bid — bewusst out-of-scope). |
+| **5 Dashboard & Gamification** | ⚠️ 3/5 partial, 1 missing | Hier liegt der größte Demo-Risk — siehe Detail unten. |
+
+**Wichtigste Erkenntnis:** Use-Cases 1–4 sind demo-ready. **Use-Case 5
+ist die Schwachstelle** und braucht entweder verbale Framing-Sätze
+oder bis Freitag noch Frank-Arbeit.
+
+---
+
+## 🚧 USE-CASE 5 — die Schwachstellen im Detail
+
+### 5.1 Dashboard-Ansichten — ⚠️ partial
+**Page:** `manager-dashboard.html` (d1)
+**Bid-Ask:** „Angebot Review, Akzeptieren von Kursteilnehmern, Rechnung
+kontrollieren, Zahlungsstatus, Fragen von Usern, Lernpfad Posten,
+Community-Sichtbarkeit" — laut PDF Spalte 1.
+**Tatsächlich:** Review-Queue ✅, „Zahlungschecks vor Frist"-KPI vorhanden
+(als Label), Manager-Inbox CSS-Klassen existieren ABER ohne HTML-Content.
+**Demo-Strategie:**
+- KPI-Tiles zeigen, Review-Queue durchklicken
+- Zahlungsstatus + User-Inbox **verbal** als „im Q3-Backoffice-Sprint"
+  positionieren
+- **NICHT durchklicken lassen** — Page hat **~20 Dead-Clicks** (siehe Warnung unten).
+
+### 5.2 Personalisierte Empfehlungen — ⚠️ partial
+**Page:** `kompetenzen.html` (k1)
+**Bid-Ask:** „SAP Rollenwechsel, Onboarding-Pfad, Kompetenzen-Gaps
+schliessen, Org-Einheit, Lernpfade zuweisen"
+**Tatsächlich:** Kompetenzmodell-Karten ✅, Empfehlungs-Logik teilweise
+in `lernplatz-intern.html` (Tooltip + „Empfehlung"-Sort). Konkrete
+Gap-Visualisierung fehlt, SAP-Rollenwechsel-Trigger fehlt.
+**Demo-Strategie:** Kompetenzen-Karten zeigen, Tooltip in lernplatz öffnen,
+**verbal:** „Gap-Visualisierung + SAP-Trigger kommen mit dem
+Self-Service-Sprint".
+
+### 5.3 Persönliche Lernpfade — ⚠️ partial
+**Page:** `kompetenzen.html` (k1)
+**Bid-Ask:** „selber zusammenstellen, Veröffentlichen, Sharen"
+**Tatsächlich:** `<aside class="kp-builder">` existiert im HTML, ist
+aber `display: none`. Lernpfad-ANZEIGE vorhanden, EDITOR nicht aktiv.
+**Demo-Strategie:** Verbal als „Builder-UI nicht aktiviert für ZK09 —
+Spec ist da, Implementierung Q3".
+
+### 5.4 Gamification (Punkte, Badges, Leaderboards) — 🚧 missing
+**Page:** keine eigene
+**Bid-Ask:** „Streak Leaderboard, Aktivitäts-Level"
+**Tatsächlich:** Punkte + Badges sichtbar auf `mein-lernen.html`
+(„1247 Punkte", „Mai-Badge"). Leaderboard / Streak / Activity-Level UI
+existiert nirgends. Permission-Eintrag „Leaderboards anzeigen / steuern"
+in `rollen-berechtigungen.html` als einziger Anker.
+**Demo-Strategie:** Auf mein-lernen Punkte + Badges zeigen, dann verbal:
+„Leaderboard ist als Roadmap-Item §5.4 — Permission-Eintrag in der
+Rollen-Matrix als Vorbereitung". Step 16 (Gamification-Roadmap)
+unterstützt das.
+
+### 5.5 Social-Learning — ⚠️ partial
+**Page:** `social-wall.html` (s1)
+**Bid-Ask:** „Social Feed automatisiert über Aktivitäten zum schauen,
+filtern, sich beteiligen, Engagement"
+**Tatsächlich:** Post-Karten als statisches Mockup. Keine JavaScript-
+Logik, die echte Events einspielt.
+**Demo-Strategie:** Feed durchscrollen, **verbal:** „heute Mockup,
+Backend-Anbindung in Sprint X".
+
+---
+
+## 🚨 DEMO-PRE-FLIGHT-WARNUNGEN
+
+### 1. `manager-dashboard.html` hat 20 Dead-Clicks
+Reviewer landen mit jedem Klick im Dead-Link-Toast („Diese Funktion
+ist nicht Teil der ZK09-Bewertung"). Sieht unsauber aus für genau die
+Page, die im Bid §5.1 die wichtigste Admin-Surface ist. **Empfehlung:**
+Page nur als „Übersicht" zeigen, NICHT als „Klick-Tour".
+
+Weitere Pages mit vielen Dead-Clicks:
+- `lernplatz-extern.html`: 8
+- `lernplatz-intern.html`: 7
+- `nutzer-anlegen-extern.html`: 6
+
+### 2. Fehlende Inter-Page-Bridges (Wizard-Dropdown muss überbrücken)
+- 1.2 → 1.3: `nutzerprofil-detail` → `nutzer-anlegen-intern` (🔁)
+- 2.4 → 3.1: `freigabeprozess` → `teilnehmerliste-angebot` (🔁)
+- 4.1 → 4.2: irgendein internal-Page → `webshop-katalog` (🔁)
+- 5.2 → 5.3: `kompetenzen` → `social-wall` (🔁)
+
+Wizard ist genau dafür da — kein Problem, aber Demo-Driver muss aktiv
+zum Dropdown greifen statt im UI klicken.
+
+### 3. Daten-Inkonsistenzen (user-flagged „später" — nur FYI)
+- **5 verschiedene Marc-Nachnamen** auf den Pages: Baumann, Brunner,
+  Keller, Schmid, Steiner. PDF + Persona-Doku nennt **Marc Steiner**
+  als Kanon. Wenn Reviewer wechselnde Namen sieht, wirkt es wie
+  unfertige Demo-Daten.
+- Direktion JI vs. „Direktion Justiz und Inneres" — gemischt benutzt.
+- Frank's Bid-Beilage erwähnt zudem KK1/KK2/KK3 Konsolidierungskreise,
+  6 Direktionen mit Angebots-Zahlen, 8 Lernkategorien mit Farben — auf
+  den Pages noch nicht durchgehend konsistent.
+
+Daten-Unifizierung laut User für späteren Round geplant.
+
+---
+
+## 🆕 Bid-Anforderungen, die NICHT im PDF-Demo-Plan stehen
+
+Aus `pflichtenheft-extracted.md` + `WALKTHROUGH-ROUTES-ROLLEN.md`
+extrahiert. Diese sind im Bid genannt, aber nicht als eigene PDF-
+Demo-Zeile geplant. Empfehlung: **verbal als „weitere Funktionen, die
+wir bauen werden" einstreuen**, nicht explizit demonstrieren.
+
+| Bid-Punkt | Aktueller Stand | Demo-Strategie |
+|---|---|---|
+| Jahresplanung-Dashboard (§4.1) | keine Page | verbal in Use-Case 3 (Verwaltung) erwähnen |
+| Vorlagen-Taxonomie (§8 — 5 Kategorien) | nur via vorlagen-uebersicht | verbal in Use-Case 2.1 streuen |
+| Status-Workflow Vollständig (Entwurf → … → Archiviert) | nur Entwurf→Aktiv sichtbar | verbal in Use-Case 2.4 |
+| Bulk-Role-Toolbar | Spec in WALKTHROUGH-ROUTES-ROLLEN.md (Route A) | verbal in Use-Case 1.1 |
+| Doppelrollen Critical-Warning Panel | Spec da, UI nicht | verbal in Use-Case 1.2 |
+| Pending-Bar Datenschutzbeauftragte | offen | nicht erwähnen (zu unklar) |
+| Mobile native Patterns | mobile-anmelden.html als Showcase | OK |
+| GoShow Tablet-App | „keine TS" lt. Bid | bewusst weglassen |
 
 ---
 
 ## 📋 Page → Bid-Use-Case Matrix (35 produktive Pages)
 
-(2 Experiment-Files `experiment-profile-dropdown-*` und das mutmaßlich
-versehentlich committete `mein-lernen_claude.html` sind keine
-Demo-Surfaces — ignoriert.)
-
-| Page | Bid-Use-Case | Wizard-Step heute | Sichtbar? |
+| Page | Bid-Use-Case | Wizard-Step | Coverage |
 |---|---|---|---|
-| `rollen-berechtigungen.html` 🆕 | 1.1 | r1 (extra) | ✅ |
-| `rolle-bearbeiten.html` | 1.1 | r2 (extra) | ✅ |
-| `nutzeruebersicht.html` | 1.2 | r3 (extra) | ✅ |
-| `nutzerprofil-detail.html` | 1.2 (Doppelrolle) | r4 (extra) | ✅ |
-| `nutzer-anlegen-intern.html` | 1.3 | r5 (extra) | ✅ |
-| `nutzer-anlegen-extern.html` | 1.3 | r6 (extra) | ✅ |
+| `rollen-berechtigungen.html` 🆕 | 1.1 | r1 | ✅ |
+| `rolle-bearbeiten.html` | 1.1 | r2 | ✅ |
+| `nutzeruebersicht.html` | 1.2 | r3 | ✅ |
+| `nutzerprofil-detail.html` | 1.2 (Doppelrolle) | r4 | ✅ |
+| `nutzer-anlegen-intern.html` | 1.3 | r5 | ✅ |
+| `nutzer-anlegen-extern.html` | 1.3 | r6 | ✅ |
 | `vorlagen-uebersicht.html` | 2.1 | Step 10 (tab #2) | ✅ |
-| `vorlage-bearbeiten.html` | 2.1 | – (Drill-Down) | ❌ ok |
-| `angebot-erfassen.html` | 2.2 | Step 11 | ✅ |
-| `lerneditor-light.html` | 2.2 | – (Drill-Down) | ❌ ok |
-| `angebote-uebersicht.html` | 2.3 | Step 9 | ✅ |
+| `vorlage-bearbeiten.html` | 2.1 | – (Drill-Down) | ✅ |
 | `angebot-erstellen-einstieg.html` | 2.x (Entry) | Step 10 (tab #1) | ✅ |
-| `angebot-bearbeiten.html` 🆕 | 2.x (Admin-Edit) | a1 (extra) | ✅ |
+| `angebot-erfassen.html` | 2.2 | Step 11 | ✅ |
+| `lerneditor-light.html` | 2.2 | – (Drill-Down) | ✅ |
+| `angebote-uebersicht.html` | 2.3 | Step 9 | ✅ |
+| `angebot-bearbeiten.html` 🆕 | 2.x (Admin-Edit) | a1 | ✅ |
 | `publikation-terminierung.html` | 2.4 | Step 12 | ✅ |
 | `freigabeprozess.html` | 2.4 | Step 13 | ✅ |
 | `teilnehmerliste-angebot.html` | 3.1 + 3.2 | Step 14 | ✅ |
-| `teilnehmende-uebersicht.html` | 3.2 | Step 15 | ✅ |
-| `auswertungen.html` 🆕 | 3 / 5.1 | v1 (extra) | ✅ |
-| `lernplatz-intern.html` 🆕 | 4.1 (intern) + 5.2 | Step 1 *(via Redirect)* | ✅ |
-| `lernplatz-extern.html` 🆕 | 4.1 (extern) | l1 (extra) | ✅ |
+| `teilnehmende-uebersicht.html` | 3.2 | Step 15 | ⚠️ Mail-System fehlt |
+| `auswertungen.html` 🆕 | 3.x / 5.1 | v1 | ✅ |
+| `lernplatz-intern.html` 🆕 | 4.1 + 5.2 | Step 1 *(via Redirect)* | ✅ |
+| `lernplatz-extern.html` 🆕 | 4.1 (extern) | l1 | ✅ |
 | `angebot-detail.html` | 4.1 | Step 2 | ✅ |
-| `mein-lernen.html` | 4.1 + 5.1 + 5.3 + 5.4 + 5.5 | Step 3 | ✅ |
-| `meine-buchungen.html` 🆕 | 4.1 (Buchungs-Historie) | b1 (extra) | ✅ |
-| `mobile-anmelden.html` | 4.1 (Mobile Showcase) | Step 4 | ✅ |
+| `mein-lernen.html` | 4.1 + 5.1/5.3/5.4/5.5 | Step 3 | ✅ |
+| `meine-buchungen.html` 🆕 | 4.1 (Buchungs-Hist.) | b1 | ✅ |
+| `mobile-anmelden.html` | 4.1 (Mobile) | Step 4 | ✅ |
 | `webshop-katalog.html` | 4.2 | Step 5 | ✅ |
 | `webshop-detail.html` | 4.2 | Step 6 | ✅ |
 | `webshop-checkout.html` | 4.2 | Step 7 | ✅ |
-| `webshop-2fa-setup.html` 🆕 | 4.2 (2FA) | w1 (extra) | ✅ |
+| `webshop-2fa-setup.html` 🆕 | 4.2 (2FA) | w1 | ✅ |
 | `webshop-bestaetigung.html` | 4.2 | Step 8 | ✅ |
-| `manager-dashboard.html` 🆕 | 5.1 (Admin) | d1 (extra) | ✅ |
-| `kompetenzen.html` 🆕 | 5.3 (Lernpfade) | k1 (extra) | ✅ |
-| `social-wall.html` 🆕 | 5.5 (Social) | s1 (extra) | ✅ |
+| `manager-dashboard.html` 🆕 | 5.1 (Admin-DB) | d1 | ⚠️ Zahl. + Inbox fehlen |
+| `kompetenzen.html` 🆕 | 5.2 + 5.3 | k1 | ⚠️ Gap+Builder fehlen |
+| `social-wall.html` 🆕 | 5.5 | s1 | ⚠️ Auto-Feed fehlt |
 | `index.html` | Launcher | – | – |
-
-**Im Wizard sichtbar: alle 30 demonstrationsrelevanten Pages.** Die
-beiden Drill-Down-Editoren (`vorlage-bearbeiten`, `lerneditor-light`)
-bleiben bewusst "nur via Drill-Down" — sinnvoller Demo-Pfad ist:
-Übersicht → Bearbeiten klicken.
+| `mein-lernen_claude.html` | (Variante / Versehen?) | – | bei Chris klären |
+| 2× experiment-profile-dropdown-* | – | – | ignoriert |
 
 ---
 
-## 1. Nutzerverwaltung
-**Wizard-Gruppe 1 — `stepIds: ['r1','r2','r3','r4','r5','r6']`.**
-Komplett neu seit 2026-05-27 — vorher war diese Gruppe leer.
+## 🎯 Frank-Backlog (bis 2026-05-31 wünschenswert)
 
-### 1.1 Verwaltung von Rollen und Berechtigungen
-- ✅ `rollen-berechtigungen.html` (r1) — **massiv überholt** (Upstream
-  +2 787 Zeilen): Matrix-Views, Tile-Grids, Multi-Direktion/Amt-Scope-
-  Editor. Enthält Permission-Zeile „Leaderboards anzeigen / steuern"
-  (für Use-Case 5.4).
-- ✅ `rolle-bearbeiten.html` (r2) — Detail-Editor einer Rolle.
-- 🚧 **Roadmap** (siehe Upstream-Spec `WALKTHROUGH-ROUTES-ROLLEN.md`):
-  Route A (6 Steps, „Schnellzuweisung") + Route B (9 Steps,
-  „Doppelrolle Multi-Scope") sollen als geführte In-Page-Walkthroughs
-  realisiert werden. Heute zeigt der Wizard nur die Pages als Liste —
-  keine Element-Targets. Adoption in einer separaten PR.
+Was Frank konkret bauen könnte um die ⚠️/🚧-Items zu schließen.
+Reihenfolge nach Bid-Impact:
 
-### 1.2 Anzeige Doppelrollen / Mehrfachanstellung
-- ✅ `nutzeruebersicht.html` (r3) — Listenansicht.
-- ✅ `nutzerprofil-detail.html` (r4) — Chip „Mehrfachanstellung · 2
-  Direktionen" + Hinweise „Doppelrolle erkannt / bestätigt".
+1. **5.4 Leaderboard-Mini-Page** (`leaderboard.html`) — Top-10 Liste,
+   eigene Position hervorgehoben, Streak-Spalte. ~2h Aufwand. Schließt
+   das einzige 🚧 in Use-Case 5.
+2. **5.1 manager-dashboard.html: Zahlungsstatus-Card + User-Fragen-
+   Inbox-Content** — CSS-Klassen sind da, nur Mockup-Daten fehlen.
+   ~1h Aufwand. Reduziert verbal-Roadmap-Anteil deutlich.
+3. **5.3 kompetenzen.html: Builder-Sidebar aktivieren** (`display:none`
+   entfernen, 3 Module rein-mocken). ~1h. Macht „Lernpfad selber
+   zusammenstellen" demonstrierbar.
+4. **5.5 social-wall.html: 2-3 zusätzliche dynamisch-aussehende Posts**
+   (Avatare, Timestamps, Engagement-Counter). ~30min. Hebt den
+   Mockup-Charakter ab.
+5. **5.2 kompetenzen.html: Kompetenz-Gap-Visualisierung** (Balken
+   target vs. current). ~1.5h. Schließt SAP-Empfehlungs-Story.
 
-### 1.3 Erstellung von Nutzerprofilen (intern + extern)
-- ✅ `nutzer-anlegen-intern.html` (r5).
-- ✅ `nutzer-anlegen-extern.html` (r6).
+Alles in Use-Case 1 + 2 + 3.1 + 4.x ist demo-ready — **nicht
+nachbessern**.
 
 ---
 
-## 2. Erstellungs- und Publikationsprozess
-**Wizard-Gruppe 2 — `stepIds: ['9','10','11','a1','12','13']`.**
-Neuer Step `a1` zwischen Erfassen (11) und Publikation (12).
-
-### 2.1 Vorlagen erstellen / bearbeiten
-- ✅ `vorlagen-uebersicht.html` (Step 10 file-tab).
-- ✅ `vorlage-bearbeiten.html` — Drill-Down (nicht im Wizard).
-
-### 2.2 Angebote erfassen
-- ✅ `angebot-erfassen.html` (Step 11) — Multi-Section Form.
-- ✅ `lerneditor-light.html` — Drill-Down (nicht im Wizard).
-
-### 2.3 Übersicht aller Angebote
-- ✅ `angebote-uebersicht.html` (Step 9) — Cross-Angebot Liste.
-
-### 2.4 Publikation + Freigabeprozess
-- ✅ `publikation-terminierung.html` (Step 12).
-- ✅ `freigabeprozess.html` (Step 13) — 4-Augen-Review.
-
-### 2.x Bestehende Angebote bearbeiten (neu)
-- ✅ `angebot-bearbeiten.html` 🆕 (a1) — Admin-Detail-Edit für
-  bestehende Angebote (z.B. „Resilienz im Berufsalltag").
-  Lückenfüller für den Edit-Workflow nach der Publikation.
-
----
-
-## 3. Verwaltung bestehender Angebote
-**Wizard-Gruppe 3 — `stepIds: ['14','15','v1']`.** Neuer Step `v1`.
-
-### 3.1 Teilnehmerlisten exportieren / editieren
-- ✅ `teilnehmerliste-angebot.html` (Step 14) — `.xlsx` + `.csv`
-  Export, Edit-Aktionen.
-
-### 3.2 Benachrichtigung der Teilnehmenden
-- ✅ `teilnehmerliste-angebot.html` (Step 14) — „E-Mail senden" Button.
-- ✅ `teilnehmende-uebersicht.html` (Step 15) — Cross-Angebot Mass-E-Mail.
-
-### 3.x Reporting (neu, Bid 5.1-relevant)
-- ✅ `auswertungen.html` 🆕 (v1) — Reporting-Dashboard. Liegt
-  thematisch zwischen „Verwaltung" und „Dashboard"; aktuell in
-  Gruppe 3 verortet weil der Admin-Workflow dort hingehört.
-
----
-
-## 4. Anmeldeprozess
-**Wizard-Gruppe 4 — `stepIds: ['1','l1','2','3','b1','4','5','6','w1','7','8']`.**
-
-### 4.1 Anmeldung / Bestätigung / Abmeldung (intern)
-- ✅ `lernplatz-intern.html` 🆕 (Step 1, via Redirect von `lernplatz.html`).
-  Persona-getrennte Discovery-Page für interne Lernende.
-- ✅ `lernplatz-extern.html` 🆕 (l1) — Discovery für externe Lernende.
-- ✅ `angebot-detail.html` (Step 2) — 5 Anmelde-Varianten.
-- ✅ `mein-lernen.html` (Step 3) — persönlicher Hub.
-- ✅ `meine-buchungen.html` 🆕 (b1) — Buchungs-Historie (war als
-  „Externer User Dashboard" im Bid gefordert).
-- ✅ `mobile-anmelden.html` (Step 4).
-
-### 4.2 Kostenpflichtige Anmeldung (extern)
-- ✅ `webshop-katalog.html` (Step 5).
-- ✅ `webshop-detail.html` (Step 6).
-- ✅ `webshop-checkout.html` (Step 7) — 4-Step Wizard.
-- ✅ `webshop-2fa-setup.html` 🆕 (w1) — 2FA-Setup-Flow,
-  Lückenfüller für den Checkout.
-- ✅ `webshop-bestaetigung.html` (Step 8) — Auftrags-Quittung.
-
-### 4.3 Eintrittskontrolle Smartphone-App, GoShows
-- 🚫 **„keine TS" laut Bid** — nicht im Scope, nur als Roadmap erwähnen.
-
----
-
-## 5. Dashboard und Gamification
-**Wizard-Gruppe 5 — `stepIds: ['d1','k1','s1','16','17']`.** Drei neue
-Steps vor den Roadmap-Einträgen 16+17.
-
-### 5.1 Dashboard-Ansichten für unterschiedliche Rollen
-- ✅ `manager-dashboard.html` 🆕 (d1) — **Admin-Dashboard.** ZHlearn-
-  Manager-Workspace mit Leader-Metrics. War vorher die größte Lücke.
-- ✅ `mein-lernen.html` (Step 3) — Learner-Dashboard.
-- ✅ `meine-buchungen.html` 🆕 (b1) — Externer-User-Dashboard.
-
-### 5.2 Personalisierte Empfehlungen
-- ✅ `lernplatz-intern.html` (Step 1) — Tooltip + „Empfehlung"-Sort +
-  Social-Signal („3 Personen aus dem Bauinspektorat empfehlen").
-
-### 5.3 Persönliche Lernpfade
-- ✅ `kompetenzen.html` 🆕 (k1) — „Meine Entwicklung · Kompetenzen
-  & Lernpfade". Sowohl Anzeige als auch Editor-Affordances.
-- ✅ `mein-lernen.html` (Step 3) — laufender Lernpfad-Beispiel.
-
-### 5.4 Gamification (Punkte, Badges, Leaderboards)
-- ✅ Punkte + Badges: `mein-lernen.html` („1247 Punkte", „Mai-Badge").
-- 🚧 **Leaderboards** — keine dedizierte Page. Permission-Eintrag in
-  `rollen-berechtigungen.html`. Vorschlag: verbal als Roadmap.
-
-### 5.5 Social-Learning (Teilen, Likes, Kommentare)
-- ✅ `social-wall.html` 🆕 (s1) — **Social Wall.** Shared Learner-
-  Content. War vorher die zweitgrößte Lücke.
-- ✅ `mein-lernen.html` („Empfehlen", „Teilen") + `angebot-detail.html`
-  (Share-Button).
-
-### 5.x Roadmap-Steps (16, 17)
-- ✅ Step 16 — Gamification-Roadmap (Wizard zeigt im Panel).
-- ✅ Step 17 — AI-Roadmap (Wizard zeigt im Panel).
-
----
-
-## 🆕 Upstream bewegt sich — wie wir synchron bleiben
-
-### Neue Specs (Upstream, noch nicht adoptiert)
-- `WALKTHROUGH-ROUTES-ROLLEN.md` (Upstream, 287 Zeilen) — definiert
-  Route A (6 Steps) + Route B (9 Steps) für die rollen-berechtigungen-
-  Surface. Element-Targeting-Spec mit YAML-Step-Map (Zeilen 259–285).
-  → Für die ZK09-Demo verbal erwähnen, Adoption als follow-up.
-- `ROLLEN-WORKFLOW.md` (Upstream, 189 Zeilen) — Datenmodell-Hintergrund
-  zu Routes A/B („Quick-Inline" vs „Deep-Workspace" Flow).
-
-### Auto-Sync
-- `ai-zhlearn-autopull` sidecar pullt Upstream alle 120 s.
-- Neue Pages erscheinen sofort live, brauchen aber Eintrag in
-  `EXTRA_STEPS` (siehe `walkthrough/wizard.js:36-58`) bevor sie im
-  Wizard-Panel auftauchen.
-- Wenn Upstream `DEMO-FLOW.md` erweitert (z.B. neue `### Step 18`),
-  reicht es, die `EXTRA_STEPS`-Einträge zu löschen und die echten
-  DEMO-FLOW-IDs in `WALKTHROUGH_STRUCTURE` einzutragen.
-
----
-
-## Aktions-Liste vor der Demo
+## ✅ Aktions-Liste vor der Demo
 
 | Priorität | Action | Status |
 |---|---|---|
-| ✅ erledigt | `lernplatz.html`-Redirect (nginx) | `deploy/nginx.conf` |
-| ✅ erledigt | 10 neue Pages im Wizard sichtbar machen | `walkthrough/wizard.js` |
-| ✅ erledigt | FLOWS.md update | diese Datei |
-| P0 | Übersichts-Page (`/walkthrough/overview.html`) um die neuen Pages erweitern (USE_CASES const) | follow-up commit |
-| P1 | `mein-lernen_claude.html` mit Chris klären (versehentlich committet?) | Bugherd / Slack |
-| P2 | DEMO-FLOW.md-Erweiterung für Nutzerverwaltung als Upstream-PR | nach ZK09-Review |
-| P2 | WALKTHROUGH-ROUTES-ROLLEN.md Route A + B adoptieren | nach ZK09-Review |
-| P3 | Leaderboard-Mini-Mockup oder verbal als Roadmap | Demo-Skript |
+| ✅ | nginx-Redirect `/lernplatz.html` → `/lernplatz-intern.html` | live |
+| ✅ | 10 neue Pages im Wizard sichtbar (`EXTRA_STEPS` → `extras.md`) | live |
+| ✅ | PDF-Metadata-Chips (Prio, Owner, Status, Dauer) auf jedem Step | live |
+| ✅ | Coverage-Chip (⚠️ teilw. / 🚧 fehlt) + verbal-Roadmap-Callouts | live |
+| ✅ | Volle Narration für Use-Case 1 + 5 in `extras.md` | live |
+| ✅ | Stub-Narration für a1, v1, l1, b1, w1 ausformuliert | live |
+| ✅ | FLOWS.md auf Audit-Stand 2026-05-27 aktualisiert | live |
+| P0 | Demo-Briefing mit Frank: 5 Items aus „Frank-Backlog" priorisieren | offen |
+| P1 | `mein-lernen_claude.html` mit Chris klären (Versehen?) | offen (Bugherd?) |
+| P2 | Daten-Konsistenz (5 Marc-Nachnamen → Marc Steiner) | „später" lt. User |
+| P3 | WALKTHROUGH-ROUTES-ROLLEN.md Route A + B als geführte Tour | nach ZK09 |
 
 ---
 
 ## Quellen
 
-- §3 Pflichtenheft (Bid-Document) — Live-Demo Use-Cases.
-- `~/projects/platform/tools/zhlearn/DEMO-FLOW.md` (Upstream-SSOT,
-  unverändert seit Baseline).
-- `~/projects/platform/tools/zhlearn/WALKTHROUGH-ROUTES-ROLLEN.md`
-  + `ROLLEN-WORKFLOW.md` (Upstream, neu 2026-05-27).
-- `walkthrough/wizard.js:29-58` — `WALKTHROUGH_STRUCTURE` + `EXTRA_STEPS`.
-- Upstream-Diff `ae5140d..71673cf` (36 Commits, 10 neue HTML-Files).
+- §3 + §4 + §5 + §8 Pflichtenheft (Bid-Document, Upstream `pflichtenheft-extracted.md`).
+- `docs/Status - Tabellenblatt1.pdf` (Demo-Plan, Stand User 2026-05-27).
+- Upstream `DEMO-FLOW.md` (SSOT für Steps 1–17, unverändert seit Baseline).
+- Upstream `WALKTHROUGH-ROUTES-ROLLEN.md` + `ROLLEN-WORKFLOW.md` (neu 2026-05-27, noch nicht adoptiert).
+- Upstream `OPEN-QUESTIONS.md` (Demo-Blocker: GoShow, AI-Labeling, Leaderboard-Default).
+- ZK09-Audit-Lauf 2026-05-27 (3 parallele Explore-Agents: Bid-Scope / Coverage-Matrix / Page-Level).
+- `walkthrough/wizard.js:29-58` (`WALKTHROUGH_STRUCTURE`), `walkthrough/demo-metadata.json`, `walkthrough/extras.md`.

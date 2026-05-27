@@ -228,6 +228,51 @@
   letter-spacing: 0;
   font-style: italic;
 }
+#wiz-root .wiz-chip--cov-partial {
+  background: rgba(176, 100, 0, 0.12);
+  border-color: rgba(176, 100, 0, 0.35);
+  color: #804900;
+  text-transform: none;
+  letter-spacing: 0;
+}
+#wiz-root .wiz-chip--cov-missing {
+  background: rgba(176, 0, 32, 0.10);
+  border-color: rgba(176, 0, 32, 0.30);
+  color: #8a0019;
+  text-transform: none;
+  letter-spacing: 0;
+}
+/* Demo-driver callouts: surface PDF-driven warnings / verbal-roadmap
+   pointers before the narration sections so they're impossible to miss. */
+#wiz-root .wiz-callout {
+  margin: 10px 0 14px;
+  padding: 10px 12px;
+  border-left: 3px solid;
+  border-radius: 2px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+#wiz-root .wiz-callout strong {
+  display: block;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+#wiz-root .wiz-callout--hint {
+  background: rgba(176, 0, 32, 0.06);
+  border-color: #b00020;
+  color: #5a0011;
+}
+#wiz-root .wiz-callout--hint strong { color: #b00020; }
+#wiz-root .wiz-callout--roadmap {
+  background: rgba(176, 100, 0, 0.06);
+  border-color: #b06400;
+  color: #4d2c00;
+}
+#wiz-root .wiz-callout--roadmap strong { color: #b06400; }
 #wiz-root .wiz-narration section { margin-top: 16px; }
 #wiz-root .wiz-narration section h3 {
   font-family: 'Inter', system-ui, sans-serif;
