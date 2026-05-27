@@ -37,10 +37,13 @@
   // Overlay-side narration for pages not (yet) in upstream DEMO-FLOW.md.
   // Same markdown format as DEMO-FLOW.md; ID prefix `r/a/v/l/b/w/d/k/s`
   // distinguishes overlay-defined steps from upstream's numeric IDs.
-  const EXTRAS_URL = './extras.md';
+  // Absolute paths — wizard.js is injected into pages all over the
+  // root, so relative URLs (`./extras.md`) would resolve against the
+  // page URL and 404 from anything outside /walkthrough/.
+  const EXTRAS_URL = '/walkthrough/extras.md';
   // PDF-driven demo metadata (priorität / owner / status / dauer)
   // applied to ANY step ID present, real or synthetic.
-  const METADATA_URL = './demo-metadata.json';
+  const METADATA_URL = '/walkthrough/demo-metadata.json';
 
   const META_LABELS = new Set(['Persona', 'Award lens']);
 
