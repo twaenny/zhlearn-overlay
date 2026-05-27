@@ -5,6 +5,11 @@ Quelle: **§3 „Live-Demo folgender Use Cases"** des Pflichtenhefts,
 Specs (`DEMO-FLOW.md`, `WALKTHROUGH-ROUTES-ROLLEN.md`, `OPEN-QUESTIONS.md`,
 `pflichtenheft-extracted.md`).
 
+> **🎬 Per-Sub-Point Demo-Scripts:** `docs/scripts/` enthält pro Bid §3
+> Sub-Point ein eigenes Skript (Bid-Text → Pages → Demo-Flow Sekunden-genau
+> → Talking Points → Bid-Compliance-Evidence → Lücken → Verbesserungen).
+> Siehe [`docs/scripts/README.md`](docs/scripts/README.md) für Übersicht.
+
 Demo-Deadline: **2026-05-31**. Gesamt-Demo-Dauer laut PDF: **88 min**
 (14 + 28 + 7 + 15 + 24).
 
