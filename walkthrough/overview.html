@@ -168,45 +168,49 @@
 
   <script>
     // Single source of truth: the bid §3 use cases + their page map.
-    // Mirrors FLOWS.md. Status flags drive the badges.
+    // Mirrors FLOWS.md and the wizard's WALKTHROUGH_STRUCTURE + EXTRA_STEPS.
+    // Status flags drive the badges. Updated 2026-05-27.
     const USE_CASES = [
       {
         num: '1', title: 'Nutzerverwaltung',
         sub: 'Bid §3 — Rollen, Berechtigungen, Profile (intern + extern)',
         bullets: [
           { title: '1.1 Verwaltung von Rollen und Berechtigungen', cards: [
-            { title: 'Rollen & Berechtigungen', file: 'rollen-berechtigungen.html', wiz: false },
-            { title: 'Rolle bearbeiten', file: 'rolle-bearbeiten.html', wiz: false },
+            { title: 'Rollen & Berechtigungen', file: 'rollen-berechtigungen.html', wiz: true, step: 'r1', note: 'Matrix-Editor + Multi-Direktion-Scope (überarbeitet 2026-05-27)' },
+            { title: 'Rolle bearbeiten', file: 'rolle-bearbeiten.html', wiz: true, step: 'r2' },
           ]},
           { title: '1.2 Anzeige Doppelrollen / Mehrfachanstellung', cards: [
-            { title: 'Nutzerübersicht', file: 'nutzeruebersicht.html', wiz: false },
-            { title: 'Nutzerprofil Detail', file: 'nutzerprofil-detail.html', wiz: false, note: 'Zeigt Doppelrolle + Mehrfachanstellung' },
+            { title: 'Nutzerübersicht', file: 'nutzeruebersicht.html', wiz: true, step: 'r3' },
+            { title: 'Nutzerprofil Detail', file: 'nutzerprofil-detail.html', wiz: true, step: 'r4', note: 'Zeigt Doppelrolle + Mehrfachanstellung (Demo-Climax)' },
           ]},
           { title: '1.3 Erstellung von Nutzerprofilen (intern + extern)', cards: [
-            { title: 'Nutzer anlegen — intern', file: 'nutzer-anlegen-intern.html', wiz: false },
-            { title: 'Nutzer anlegen — extern', file: 'nutzer-anlegen-extern.html', wiz: false },
+            { title: 'Nutzer anlegen — intern', file: 'nutzer-anlegen-intern.html', wiz: true, step: 'r5', note: 'SSO-Lookup via IAMZH' },
+            { title: 'Nutzer anlegen — extern', file: 'nutzer-anlegen-extern.html', wiz: true, step: 'r6', note: 'E-Mail-Verifikation + 2FA per ZK06' },
           ]},
         ],
-        gap: 'Wizard-Gruppe 1 ist heute leer — alle 6 Pages existieren, aber DEMO-FLOW.md hat keine Steps dafür. Reviewer können sie via Wizard nicht erreichen.',
       },
       {
         num: '2', title: 'Erstellungs- und Publikationsprozess',
         sub: 'Bid §3 — Vorlagen, Inhalt, Übersicht, Publikation, Freigabe',
         bullets: [
           { title: '2.1 Vorlagen erstellen & bearbeiten', cards: [
-            { title: 'Vorlagen Übersicht', file: 'vorlagen-uebersicht.html', wiz: true, step: '10' },
-            { title: 'Vorlage bearbeiten', file: 'vorlage-bearbeiten.html', wiz: false, note: 'Drill-Down von Step 10' },
+            { title: 'Erstellungs-Einstieg', file: 'angebot-erstellen-einstieg.html', wiz: true, step: '10', note: 'Entry: Von Grund auf neu vs. Aus Vorlage' },
+            { title: 'Vorlagen Übersicht', file: 'vorlagen-uebersicht.html', wiz: true, step: '10', note: 'file-tab #2 von Step 10' },
+            { title: 'Vorlage bearbeiten', file: 'vorlage-bearbeiten.html', wiz: false, note: 'Drill-Down von Vorlagen-Übersicht' },
           ]},
           { title: '2.2 Angebote inkl. Inhalt erfassen', cards: [
-            { title: 'Angebot erfassen', file: 'angebot-erfassen.html', wiz: true, step: '11' },
-            { title: 'Lerneditor light', file: 'lerneditor-light.html', wiz: false, note: 'Drill-Down von Step 10' },
+            { title: 'Angebot erfassen', file: 'angebot-erfassen.html', wiz: true, step: '11', note: 'Multi-Section Form mit Live-Preview' },
+            { title: 'Lerneditor light', file: 'lerneditor-light.html', wiz: false, note: 'Drill-Down für E-Bibliothek-Inhalte' },
           ]},
           { title: '2.3 Übersicht aller Angebote', cards: [
-            { title: 'Angebote Übersicht', file: 'angebote-uebersicht.html', wiz: true, step: '9' },
+            { title: 'Angebote Übersicht', file: 'angebote-uebersicht.html', wiz: true, step: '9', note: '684 Angebote, Filter + Quick-Actions' },
           ]},
           { title: '2.4 Publikation, Terminierung, Freigabe', cards: [
             { title: 'Publikation & Terminierung', file: 'publikation-terminierung.html', wiz: true, step: '12' },
-            { title: 'Freigabeprozess', file: 'freigabeprozess.html', wiz: true, step: '13' },
+            { title: 'Freigabeprozess', file: 'freigabeprozess.html', wiz: true, step: '13', note: 'Vier-Augen-Review mit 3 Verben' },
+          ]},
+          { title: '2.x Angebot bearbeiten (Lifecycle-Edit)', cards: [
+            { title: 'Angebot bearbeiten', file: 'angebot-bearbeiten.html', wiz: true, step: 'a1', note: 'Edit-after-Publish für bestehende Angebote' },
           ]},
         ],
       },
@@ -215,11 +219,14 @@
         sub: 'Bid §3 — Teilnehmerlisten, Benachrichtigung',
         bullets: [
           { title: '3.1 Teilnehmerlisten exportieren und editieren', cards: [
-            { title: 'Teilnehmerliste — Angebot', file: 'teilnehmerliste-angebot.html', wiz: true, step: '14', note: 'Export .xlsx/.csv + Edit-Aktionen' },
+            { title: 'Teilnehmerliste — Angebot', file: 'teilnehmerliste-angebot.html', wiz: true, step: '14', note: 'Export .xlsx/.csv + Edit-Aktionen + 5-State-Pills' },
           ]},
           { title: '3.2 Benachrichtigung der Teilnehmenden', cards: [
-            { title: 'Teilnehmerliste — Angebot', file: 'teilnehmerliste-angebot.html', wiz: true, step: '14', note: '„E-Mail senden" Button' },
-            { title: 'Teilnehmende Übersicht', file: 'teilnehmende-uebersicht.html', wiz: true, step: '15' },
+            { title: 'Teilnehmerliste — Angebot', file: 'teilnehmerliste-angebot.html', wiz: true, step: '14', note: 'E-Mail-Composer-Modal mit Live-Preview + Templates' },
+            { title: 'Teilnehmende Übersicht', file: 'teilnehmende-uebersicht.html', wiz: true, step: '15', note: 'Cross-Angebot-Sicht' },
+          ]},
+          { title: '3.x Reporting / Auswertungen (bid-adjacent)', cards: [
+            { title: 'Auswertungen', file: 'auswertungen.html', wiz: true, step: 'v1', note: 'Reporting-Dashboard (KPI, Status, Drill-Down)' },
           ]},
         ],
       },
@@ -228,19 +235,22 @@
         sub: 'Bid §3 — interne + externe Anmeldung, Eintrittskontrolle',
         bullets: [
           { title: '4.1 Anmeldung / Bestätigung / Abmeldung (intern)', cards: [
-            { title: 'Lernplatz', file: 'lernplatz.html', wiz: true, step: '1' },
-            { title: 'Angebot-Detail', file: 'angebot-detail.html', wiz: true, step: '2', note: '5 Anmelde-Varianten' },
-            { title: 'Mein Lernen', file: 'mein-lernen.html', wiz: true, step: '3' },
+            { title: 'Lernplatz — intern', file: 'lernplatz-intern.html', wiz: true, step: '1', note: 'Marc-Steiner Discovery + Persona-getrennte Variante' },
+            { title: 'Angebot-Detail', file: 'angebot-detail.html', wiz: true, step: '2', note: '5 Anmelde-Varianten als Modals' },
+            { title: 'Mein Lernen', file: 'mein-lernen.html', wiz: true, step: '3', note: '5 Summary-Tiles + Abmelde-Dialog' },
             { title: 'Mobile Anmelden', file: 'mobile-anmelden.html', wiz: true, step: '4' },
           ]},
           { title: '4.2 Kostenpflichtige Anmeldung (extern)', cards: [
+            { title: 'Lernplatz — extern', file: 'lernplatz-extern.html', wiz: true, step: 'l1', note: 'Annika-Weiss Discovery — Preise sichtbar, „Buchen" CTA' },
             { title: 'Webshop Katalog', file: 'webshop-katalog.html', wiz: true, step: '5' },
             { title: 'Webshop Detail', file: 'webshop-detail.html', wiz: true, step: '6' },
-            { title: 'Webshop Checkout', file: 'webshop-checkout.html', wiz: true, step: '7', note: '4-Step Wizard inkl. 2FA' },
+            { title: 'Webshop Checkout', file: 'webshop-checkout.html', wiz: true, step: '7', note: '4-Step Wizard inkl. Self-Registration' },
+            { title: 'Webshop · 2FA-Setup', file: 'webshop-2fa-setup.html', wiz: true, step: 'w1', note: 'TOTP / SMS Setup-Flow (ZK06)' },
             { title: 'Webshop Bestätigung', file: 'webshop-bestaetigung.html', wiz: true, step: '8' },
+            { title: 'Meine Buchungen', file: 'meine-buchungen.html', wiz: true, step: 'b1', note: 'Externer Buchungs-Hub: Historie + Storno + Rechnung' },
           ]},
           { title: '4.3 Eintrittskontrolle Smartphone-App, GoShows', cards: [
-            { title: '(keine TS — laut Bid)', missing: true, note: 'Wird nur als Roadmap erwähnt' },
+            { title: '(keine TS — laut Bid)', missing: true, note: 'OPEN-QUESTIONS.md #1 — verbal als Roadmap erwähnt' },
           ]},
         ],
       },
@@ -248,28 +258,29 @@
         num: '5', title: 'Dashboard und Gamification',
         sub: 'Bid §3 — Dashboards, Empfehlungen, Lernpfade, Gamification, Social',
         bullets: [
-          { title: '5.1 Dashboard-Ansichten für unterschiedliche Rollen', cards: [
-            { title: 'Mein Lernen (Learner-Dashboard)', file: 'mein-lernen.html', wiz: true, step: '3', note: 'IST das Learner-Dashboard' },
-            { title: 'Admin-Dashboard', missing: true, note: 'Page fehlt — Mockup oder verbal' },
+          { title: '5.1 Dashboard-Ansichten für unterschiedliche Rollen (strict-reading: PLURAL)', cards: [
+            { title: 'Mein Lernen (Lerner-Dashboard)', file: 'mein-lernen.html', wiz: true, step: '3', note: 'Lerner-Sicht: Laufend · Warteliste · Pflicht · Abgeschlossen · Zertifikate' },
+            { title: 'Manager-Dashboard', file: 'manager-dashboard.html', wiz: true, step: 'd1', note: 'Manager-Sicht: Review-Queue + Inbox + Zahlungschecks (refined 2026-05-27)' },
+            { title: 'Meine Buchungen (Externer-Dashboard)', file: 'meine-buchungen.html', wiz: true, step: 'b1', note: 'Externer-User-Sicht: Buchungs-Historie' },
           ]},
-          { title: '5.2 Personalisierte Empfehlungen', cards: [
-            { title: 'Lernplatz', file: 'lernplatz.html', wiz: true, step: '1', note: 'Tooltip + „Empfehlung"-Sort + Social-Signal' },
+          { title: '5.2 Personalisierte Empfehlungen + Erläuterung', cards: [
+            { title: 'Lernplatz — intern', file: 'lernplatz-intern.html', wiz: true, step: '1', note: 'Tooltip + „Empfehlung"-Sort + Social-Signal' },
+            { title: 'Kompetenzen', file: 'kompetenzen.html', wiz: true, step: 'k1', note: 'Kompetenzmodell + SAP-Rollenwechsel-Trigger + Gap-Anker' },
           ]},
           { title: '5.3 Persönliche Lernpfade', cards: [
-            { title: 'Mein Lernen (Lernpfad-Anzeige)', file: 'mein-lernen.html', wiz: true, step: '3', note: '„Digitale Transformation Grundlagen — Lernpfad 4 Module"' },
-            { title: 'Lernpfad-Editor', missing: true, note: 'Page fehlt — Admin baut Pfade aus Modulen' },
+            { title: 'Kompetenzen (Lernpfade + Builder)', file: 'kompetenzen.html', wiz: true, step: 'k1', note: 'Builder-Sidebar heute display:none — Build-Task #2 (~1h)' },
+            { title: 'Mein Lernen (Lernpfad-Anzeige)', file: 'mein-lernen.html', wiz: true, step: '3', note: '„Digitale Transformation — Lernpfad 4 Module"' },
           ]},
           { title: '5.4 Gamification (Punkte, Badges, Leaderboards)', cards: [
             { title: 'Mein Lernen (Punkte + Badges)', file: 'mein-lernen.html', wiz: true, step: '3', note: '„1247 Punkte", „Mai-Badge"' },
-            { title: 'Leaderboard', missing: true, note: 'Page fehlt — nur als Permission-Eintrag erwähnt' },
+            { title: 'Leaderboard', missing: true, note: '🚧 KRITISCH: einzige fehlende Page in der 17er-Liste — Build-Task #1 (~2h)' },
           ]},
-          { title: '5.5 Social-Learning (Teilen, Likes, Kommentare)', cards: [
+          { title: '5.5 Social-Learning (Teilen, Likes, Kommentare, Lernpfade)', cards: [
+            { title: 'Social Wall', file: 'social-wall.html', wiz: true, step: 's1', note: 'Activity-Feed mit Post-Karten (heute Mockup-Content)' },
             { title: 'Mein Lernen („Empfehlen", „Teilen")', file: 'mein-lernen.html', wiz: true, step: '3' },
-            { title: 'Angebot-Detail (Share-Button)', file: 'angebot-detail.html', wiz: true, step: '2' },
-            { title: 'Social-Learning-Hub', missing: true, note: 'Likes, Kommentare, Lernpfade als Social — fehlt' },
+            { title: 'Angebot-Detail (Share + Kommentare-Tab)', file: 'angebot-detail.html', wiz: true, step: '2' },
           ]},
         ],
-        gap: 'Wizard-Steps 16+17 sind Roadmap-only. Aber: viel Use-Case-5-Substanz ist BEREITS auf mein-lernen + lernplatz sichtbar — DEMO-FLOW.md könnte das prominenter benennen.',
       },
     ];
 
