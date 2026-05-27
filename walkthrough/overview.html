@@ -280,7 +280,7 @@
     const tasksByFile = new Map();    // 'lernplatz.html' → [{id, title, url}]
     let totalOpen = 0;
     let allTaskDetails = [];          // full per-task detail records, for the bottom triage section
-    let demoMeta = {};                // PDF metadata: stepId → { subUC, priority, owner, status, minutes }
+    let demoMeta = {};                // PDF metadata: stepId → { subUC, priority, status, minutes, coverage }
     let useCasesMeta = {};            // PDF metadata: ucNum → { title, totalMin }
 
     // Best-effort fetch; overview still works without it.
@@ -304,22 +304,11 @@
         const totalChip = ucMeta && ucMeta.totalMin
           ? ` <span class="ov-badge ov-badge--mono" title="Demo-Dauer laut PDF">${ucMeta.totalMin} min</span>`
           : '';
-        // Owner attribution: collect distinct owners from PDF stepMeta
-        // for any step in this use-case (filter by subUC starting with uc.num).
-        const owners = new Set(
-          Object.values(demoMeta)
-            .filter(m => m.subUC && m.subUC.startsWith(uc.num + '.'))
-            .map(m => m.owner)
-            .filter(Boolean)
-        );
-        const ownerChip = owners.size
-          ? ` <span class="ov-badge ov-badge--mono" title="Zuständig laut PDF">👤 ${[...owners].join(', ')}</span>`
-          : '';
         let html = `
           <div class="ov-section__head" style="flex-wrap:wrap;gap:10px;">
             <span class="ov-section__num">Use Case ${uc.num}</span>
             <h2 class="ov-section__title">${uc.title}</h2>
-            ${totalChip}${ownerChip}
+            ${totalChip}
           </div>
           <p class="ov-section__sub">${uc.sub}</p>
         `;

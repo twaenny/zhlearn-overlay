@@ -198,14 +198,6 @@
   border-color: rgba(13, 17, 23, 0.15);
   color: var(--wiz-text-soft);
 }
-#wiz-root .wiz-chip--owner {
-  background: var(--wiz-bg-soft);
-  border-color: rgba(13, 17, 23, 0.15);
-  color: var(--wiz-text);
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
-}
 #wiz-root .wiz-chip--status-done {
   background: rgba(30, 127, 58, 0.12);
   border-color: rgba(30, 127, 58, 0.30);

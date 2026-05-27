@@ -41,7 +41,7 @@
   // root, so relative URLs (`./extras.md`) would resolve against the
   // page URL and 404 from anything outside /walkthrough/.
   const EXTRAS_URL = '/walkthrough/extras.md';
-  // PDF-driven demo metadata (priorität / owner / status / dauer)
+  // PDF-driven demo metadata (priorität / status / dauer)
   // applied to ANY step ID present, real or synthetic.
   const METADATA_URL = '/walkthrough/demo-metadata.json';
 
@@ -312,14 +312,13 @@
       }
     }
 
-    // Demo-plan PDF metadata: render priority / owner / status /
+    // Demo-plan PDF metadata: render priority / status /
     // duration / coverage as small mono chips. Each is optional —
     // missing fields just skip their chip.
     const m = (state.demoMeta || {})[step.id];
     if (m) {
       if (m.subUC)    chips.push(`<span class="wiz-chip wiz-chip--bid" title="Bid §3 Use-Case">§3 · ${esc(m.subUC)}</span>`);
       if (m.priority) chips.push(`<span class="wiz-chip wiz-chip--pri-${esc(m.priority.toLowerCase())}" title="Demo-Priorität">${esc(m.priority)}</span>`);
-      if (m.owner)    chips.push(`<span class="wiz-chip wiz-chip--owner" title="Zuständig">👤 ${esc(m.owner)}</span>`);
       if (m.status)   chips.push(`<span class="wiz-chip ${statusClass(m.status)}" title="Status">${esc(m.status)}</span>`);
       if (m.minutes != null) chips.push(`<span class="wiz-chip wiz-chip--mono" title="Dauer">${esc(String(m.minutes))} min</span>`);
       if (m.coverage === 'partial') chips.push(`<span class="wiz-chip wiz-chip--cov-partial" title="Audit: nur teilweise abgedeckt">⚠️ teilw.</span>`);

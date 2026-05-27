@@ -42,7 +42,7 @@ Callouts (aus `walkthrough/demo-metadata.json`).
 
 **Wichtigste Erkenntnis:** Use-Cases 1–4 sind demo-ready. **Use-Case 5
 ist die Schwachstelle** und braucht entweder verbale Framing-Sätze
-oder bis Freitag noch Frank-Arbeit.
+oder bis Freitag noch zusätzliche Build-Arbeit.
 
 ---
 
@@ -131,7 +131,7 @@ zum Dropdown greifen statt im UI klicken.
   als Kanon. Wenn Reviewer wechselnde Namen sieht, wirkt es wie
   unfertige Demo-Daten.
 - Direktion JI vs. „Direktion Justiz und Inneres" — gemischt benutzt.
-- Frank's Bid-Beilage erwähnt zudem KK1/KK2/KK3 Konsolidierungskreise,
+- Die Bid-Beilage erwähnt zudem KK1/KK2/KK3 Konsolidierungskreise,
   6 Direktionen mit Angebots-Zahlen, 8 Lernkategorien mit Farben — auf
   den Pages noch nicht durchgehend konsistent.
 
@@ -201,9 +201,9 @@ wir bauen werden" einstreuen**, nicht explizit demonstrieren.
 
 ---
 
-## 🎯 Frank-Backlog (bis 2026-05-31 wünschenswert)
+## 🎯 Offene Build-Tasks (bis 2026-05-31 wünschenswert)
 
-Was Frank konkret bauen könnte um die ⚠️/🚧-Items zu schließen.
+Konkrete Tasks um die ⚠️/🚧-Items zu schließen.
 Reihenfolge nach Bid-Impact:
 
 1. **5.4 Leaderboard-Mini-Page** (`leaderboard.html`) — Top-10 Liste,
@@ -237,7 +237,7 @@ nachbessern**.
 | ✅ | Volle Narration für Use-Case 1 + 5 in `extras.md` | live |
 | ✅ | Stub-Narration für a1, v1, l1, b1, w1 ausformuliert | live |
 | ✅ | FLOWS.md auf Audit-Stand 2026-05-27 aktualisiert | live |
-| P0 | Demo-Briefing mit Frank: 5 Items aus „Frank-Backlog" priorisieren | offen |
+| P0 | 5 Items aus „Offene Build-Tasks" priorisieren | offen |
 | P1 | `mein-lernen_claude.html` mit Chris klären (Versehen?) | offen (Bugherd?) |
 | P2 | Daten-Konsistenz (5 Marc-Nachnamen → Marc Steiner) | „später" lt. User |
 | P3 | WALKTHROUGH-ROUTES-ROLLEN.md Route A + B als geführte Tour | nach ZK09 |
