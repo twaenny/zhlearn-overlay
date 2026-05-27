@@ -399,7 +399,7 @@
           ${renderFileRow(step)}
           <p style="margin-top:8px;color:var(--wiz-text-soft);font-size:12.5px;">
             Narration noch nicht erfasst. Demo-Kontext: siehe
-            <code>docs/Status - Tabellenblatt1.pdf</code>.
+            <code>docs/2026-05-27_ZK09-Demo-Plan-Status.pdf</code>.
             ${file ? `Page direkt: <a href="/${esc(file)}"><code>${esc(file)}</code></a>` : ''}
           </p>
         </div>

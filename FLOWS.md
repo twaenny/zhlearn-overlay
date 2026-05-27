@@ -1,7 +1,7 @@
 # ZHlearn — Demo-Flow Plan + ZK09-Audit (Stand 2026-05-27)
 
 Quelle: **§3 „Live-Demo folgender Use Cases"** des Pflichtenhefts,
-**`docs/Status - Tabellenblatt1.pdf`** (Demo-Plan-Status), Upstream-
+**`docs/2026-05-27_ZK09-Demo-Plan-Status.pdf`** (Demo-Plan-Status), Upstream-
 Specs (`DEMO-FLOW.md`, `WALKTHROUGH-ROUTES-ROLLEN.md`, `OPEN-QUESTIONS.md`,
 `pflichtenheft-extracted.md`).
 
@@ -247,7 +247,7 @@ nachbessern**.
 ## Quellen
 
 - §3 + §4 + §5 + §8 Pflichtenheft (Bid-Document, Upstream `pflichtenheft-extracted.md`).
-- `docs/Status - Tabellenblatt1.pdf` (Demo-Plan, Stand User 2026-05-27).
+- `docs/2026-05-27_ZK09-Demo-Plan-Status.pdf` (Demo-Plan, Stand User 2026-05-27).
 - Upstream `DEMO-FLOW.md` (SSOT für Steps 1–17, unverändert seit Baseline).
 - Upstream `WALKTHROUGH-ROUTES-ROLLEN.md` + `ROLLEN-WORKFLOW.md` (neu 2026-05-27, noch nicht adoptiert).
 - Upstream `OPEN-QUESTIONS.md` (Demo-Blocker: GoShow, AI-Labeling, Leaderboard-Default).

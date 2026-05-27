@@ -7,12 +7,12 @@ beide Dateien gleich behandelt — IDs sind hier alphanumerisch (`r1`,
 zu vermeiden.
 
 Quellen für Inhalte + Demo-Metadaten:
-- `docs/Status - Tabellenblatt1.pdf` (Demo-Plan; Spalte 1 für Use-Case-5 Talking Points)
+- `docs/2026-05-27_ZK09-Demo-Plan-Status.pdf` (Demo-Plan; Spalte 1 für Use-Case-5 Talking Points)
 - `WALKTHROUGH-ROUTES-ROLLEN.md` (Upstream-Spec für Rollen-Routen, noch nicht adoptiert)
 
 ---
 
-## 1 · Use Case 1 · Nutzerverwaltung (Antoine + Frank, 14 min)
+## 1 · Use Case 1 · Nutzerverwaltung (14 min)
 
 ### Step r1 · `rollen-berechtigungen.html` — Rollen & Berechtigungen
 
@@ -314,7 +314,7 @@ externe Anmeldungen).
 
 ---
 
-## 5 · Use Case 5 · Dashboard & Gamification (Frank, 24 min)
+## 5 · Use Case 5 · Dashboard & Gamification (24 min)
 
 ### Step d1 · `manager-dashboard.html` — Manager-Dashboard
 

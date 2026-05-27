@@ -1,5 +1,5 @@
 {
-  "_doc": "PDF demo-plan metadata + audit-driven coverage flags, applied at render time to wizard steps by ID. Source: docs/Status - Tabellenblatt1.pdf (Stand 2026-05-27) + ZK09-Audit 2026-05-27.",
+  "_doc": "PDF demo-plan metadata + audit-driven coverage flags, applied at render time to wizard steps by ID. Source: docs/2026-05-27_ZK09-Demo-Plan-Status.pdf (Stand 2026-05-27) + ZK09-Audit 2026-05-27.",
   "useCases": {
     "1": { "title": "Nutzerverwaltung",                "totalMin": 14, "coverage": "ok"      },
     "2": { "title": "Erstellung & Publikation",        "totalMin": 28, "coverage": "ok"      },
