@@ -34,32 +34,13 @@
     { label: '5. Dashboard & Gamification',            stepIds: ['d1','k1','s1','16','17'] },
   ];
 
-  // Overlay-defined extras — pages that exist upstream but are not
-  // (yet) referenced in DEMO-FLOW.md. Rendered with title + file link
-  // and a "noch nicht in DEMO-FLOW.md dokumentiert" note; no chips,
-  // no narration sections. When upstream adds them to DEMO-FLOW.md,
-  // delete the entry here and use the real step ID in WALKTHROUGH_STRUCTURE.
-  const EXTRA_STEPS = [
-    // 1. Nutzerverwaltung
-    { id: 'r1', title: 'Rollen & Berechtigungen',           files: ['rollen-berechtigungen.html'] },
-    { id: 'r2', title: 'Rolle bearbeiten',                  files: ['rolle-bearbeiten.html'] },
-    { id: 'r3', title: 'Nutzerübersicht',                   files: ['nutzeruebersicht.html'] },
-    { id: 'r4', title: 'Nutzerprofil Detail (Doppelrolle)', files: ['nutzerprofil-detail.html'] },
-    { id: 'r5', title: 'Nutzer anlegen — intern',           files: ['nutzer-anlegen-intern.html'] },
-    { id: 'r6', title: 'Nutzer anlegen — extern',           files: ['nutzer-anlegen-extern.html'] },
-    // 2. Erstellung
-    { id: 'a1', title: 'Angebot bearbeiten',                files: ['angebot-bearbeiten.html'] },
-    // 3. Verwaltung
-    { id: 'v1', title: 'Auswertungen',                      files: ['auswertungen.html'] },
-    // 4. Anmeldeprozess
-    { id: 'l1', title: 'Lernplatz — extern',                files: ['lernplatz-extern.html'] },
-    { id: 'b1', title: 'Meine Buchungen',                   files: ['meine-buchungen.html'] },
-    { id: 'w1', title: 'Webshop · 2FA-Setup',               files: ['webshop-2fa-setup.html'] },
-    // 5. Dashboard & Gamification — fills former roadmap-only slot
-    { id: 'd1', title: 'Manager-Dashboard',                 files: ['manager-dashboard.html'] },
-    { id: 'k1', title: 'Kompetenzen & Lernpfade',           files: ['kompetenzen.html'] },
-    { id: 's1', title: 'Social Wall',                       files: ['social-wall.html'] },
-  ];
+  // Overlay-side narration for pages not (yet) in upstream DEMO-FLOW.md.
+  // Same markdown format as DEMO-FLOW.md; ID prefix `r/a/v/l/b/w/d/k/s`
+  // distinguishes overlay-defined steps from upstream's numeric IDs.
+  const EXTRAS_URL = './extras.md';
+  // PDF-driven demo metadata (priorität / owner / status / dauer)
+  // applied to ANY step ID present, real or synthetic.
+  const METADATA_URL = './demo-metadata.json';
 
   const META_LABELS = new Set(['Persona', 'Award lens']);
 
@@ -73,7 +54,9 @@
   // ------- parser (verbatim from prior wizard) --------------------------
 
   function parseDemoFlow(md) {
-    const headingRe = /^### Step (\d+)(?:\s*·\s*)?(.*?)$/gm;
+    // ID is `\w+` (digits in upstream DEMO-FLOW.md, letters in
+    // overlay-side extras.md) so both files share one parser.
+    const headingRe = /^### Step (\w+)(?:\s*·\s*)?(.*?)$/gm;
     const headings = [...md.matchAll(headingRe)];
     const steps = [];
     for (let i = 0; i < headings.length; i++) {
@@ -112,7 +95,7 @@
       const start = matches[i].index + matches[i][0].length;
       const end = i + 1 < matches.length ? matches[i + 1].index : md.length;
       const slice = md.slice(start, end);
-      const stepIds = [...slice.matchAll(/^### Step (\d+)/gm)]
+      const stepIds = [...slice.matchAll(/^### Step (\w+)/gm)]
         .map(m => m[1])
         .filter(id => stepIdSet.has(id));
       if (!stepIds.length) continue;
@@ -304,6 +287,14 @@
     state.ui.badge.hidden = !text;
   }
 
+  function statusClass(status) {
+    const s = (status || '').toLowerCase();
+    if (s.includes('abgeschlossen')) return 'wiz-chip--status-done';
+    if (s.includes('bearbeitung'))   return 'wiz-chip--status-doing';
+    if (s.includes('planung'))       return 'wiz-chip--status-plan';
+    return 'wiz-chip--mono';
+  }
+
   function renderChips(step) {
     const meta = step.sections.filter(s => META_LABELS.has(s.label));
     const chips = [];
@@ -317,6 +308,19 @@
         chips.push(`<span class="wiz-chip wiz-chip--mono">${inlineMd(facet.trim())}</span>`);
       }
     }
+
+    // Demo-plan PDF metadata: render priority / owner / status /
+    // duration as small mono chips. Each is optional — missing fields
+    // just skip their chip.
+    const m = (state.demoMeta || {})[step.id];
+    if (m) {
+      if (m.subUC)    chips.push(`<span class="wiz-chip wiz-chip--bid" title="Bid §3 Use-Case">§3 · ${esc(m.subUC)}</span>`);
+      if (m.priority) chips.push(`<span class="wiz-chip wiz-chip--pri-${esc(m.priority.toLowerCase())}" title="Demo-Priorität">${esc(m.priority)}</span>`);
+      if (m.owner)    chips.push(`<span class="wiz-chip wiz-chip--owner" title="Zuständig">👤 ${esc(m.owner)}</span>`);
+      if (m.status)   chips.push(`<span class="wiz-chip ${statusClass(m.status)}" title="Status">${esc(m.status)}</span>`);
+      if (m.minutes != null) chips.push(`<span class="wiz-chip wiz-chip--mono" title="Dauer">${esc(String(m.minutes))} min</span>`);
+    }
+
     return chips.length ? `<div class="wiz-chips">${chips.join('')}</div>` : '';
   }
 
@@ -358,15 +362,20 @@
   }
 
   function renderStepBody(step) {
-    if (step.isExtra) {
+    // Synthetic step with no narration body? Render the chips + file
+    // row + a placeholder. Steps that DO have extras.md narration just
+    // fall through to the normal renderer below.
+    const bodySections = step.sections.filter(s => !META_LABELS.has(s.label));
+    if (step.isExtra && !bodySections.length) {
       const file = step.files[0] || '';
       return `
         <div class="wiz-narration">
+          ${renderChips(step)}
           ${renderFileRow(step)}
           <p style="margin-top:8px;color:var(--wiz-text-soft);font-size:12.5px;">
-            Diese Seite ist im Prototyp neu und noch nicht in
-            <code>DEMO-FLOW.md</code> dokumentiert.
-            ${file ? `Direkt öffnen: <a href="/${esc(file)}"><code>${esc(file)}</code></a>` : ''}
+            Narration noch nicht erfasst. Demo-Kontext: siehe
+            <code>docs/Status - Tabellenblatt1.pdf</code>.
+            ${file ? `Page direkt: <a href="/${esc(file)}"><code>${esc(file)}</code></a>` : ''}
           </p>
         </div>
       `;
@@ -586,21 +595,19 @@
     const parsed = parseDemoFlow(md);
     if (!parsed.steps.length) return;
 
-    // Merge overlay-defined EXTRA_STEPS so the WALKTHROUGH_STRUCTURE
-    // reorder loop below can pick them up alongside real DEMO-FLOW.md
-    // steps. Synthetic entries get `isExtra: true` so renderStepBody
-    // can render a placeholder instead of expecting sections/chips.
-    const allSteps = [
-      ...parsed.steps,
-      ...EXTRA_STEPS.map(e => ({
-        id: e.id,
-        title: e.title,
-        files: e.files || [],
-        sections: [],
-        isRoadmap: false,
-        isExtra: true,
-      })),
-    ];
+    // Pull overlay narration (extras.md) and PDF demo metadata in
+    // parallel. Both are optional — wizard works without them.
+    const [extrasText, metaJson] = await Promise.all([
+      fetch(EXTRAS_URL, { cache: 'no-cache' }).then(r => r.ok ? r.text() : '').catch(() => ''),
+      fetch(METADATA_URL, { cache: 'no-cache' }).then(r => r.ok ? r.json() : null).catch(() => null),
+    ]);
+
+    const extraSteps = extrasText ? parseDemoFlow(extrasText).steps : [];
+    extraSteps.forEach(s => { s.isExtra = true; });
+    state.demoMeta = (metaJson && metaJson.stepMeta) || {};
+    state.useCases = (metaJson && metaJson.useCases) || {};
+
+    const allSteps = [...parsed.steps, ...extraSteps];
 
     if (WALKTHROUGH_STRUCTURE) {
       state.groups = WALKTHROUGH_STRUCTURE;

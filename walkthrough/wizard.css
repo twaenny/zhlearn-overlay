@@ -173,6 +173,61 @@
   text-transform: none;
   letter-spacing: 0;
 }
+/* Demo-plan metadata chips (from PDF via demo-metadata.json). Same
+   base as .wiz-chip; variants set background/border/color. */
+#wiz-root .wiz-chip--bid {
+  background: #eef2f7;
+  border-color: #d6dde5;
+  color: #2c3e50;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  text-transform: none;
+  letter-spacing: 0;
+}
+#wiz-root .wiz-chip--pri-hoch {
+  background: rgba(176, 0, 32, 0.10);
+  border-color: rgba(176, 0, 32, 0.30);
+  color: #8a0019;
+}
+#wiz-root .wiz-chip--pri-mittel {
+  background: rgba(176, 100, 0, 0.10);
+  border-color: rgba(176, 100, 0, 0.30);
+  color: #804900;
+}
+#wiz-root .wiz-chip--pri-niedrig {
+  background: rgba(13, 17, 23, 0.05);
+  border-color: rgba(13, 17, 23, 0.15);
+  color: var(--wiz-text-soft);
+}
+#wiz-root .wiz-chip--owner {
+  background: var(--wiz-bg-soft);
+  border-color: rgba(13, 17, 23, 0.15);
+  color: var(--wiz-text);
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+#wiz-root .wiz-chip--status-done {
+  background: rgba(30, 127, 58, 0.12);
+  border-color: rgba(30, 127, 58, 0.30);
+  color: #156227;
+  text-transform: none;
+  letter-spacing: 0;
+}
+#wiz-root .wiz-chip--status-doing {
+  background: rgba(0, 112, 180, 0.10);
+  border-color: rgba(0, 112, 180, 0.28);
+  color: var(--wiz-accent-dark);
+  text-transform: none;
+  letter-spacing: 0;
+}
+#wiz-root .wiz-chip--status-plan {
+  background: rgba(13, 17, 23, 0.04);
+  border-color: rgba(13, 17, 23, 0.15);
+  color: var(--wiz-text-soft);
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+}
 #wiz-root .wiz-narration section { margin-top: 16px; }
 #wiz-root .wiz-narration section h3 {
   font-family: 'Inter', system-ui, sans-serif;

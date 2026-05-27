@@ -1,0 +1,47 @@
+{
+  "_doc": "PDF demo-plan metadata, applied at render time to wizard steps by ID. Source: docs/Status - Tabellenblatt1.pdf (Stand 2026-05-27).",
+  "useCases": {
+    "1": { "title": "Nutzerverwaltung",                       "totalMin": 14 },
+    "2": { "title": "Erstellung & Publikation",               "totalMin": 28 },
+    "3": { "title": "Verwaltung bestehender Angebote",        "totalMin":  7 },
+    "4": { "title": "Anmeldeprozess",                         "totalMin": 15 },
+    "5": { "title": "Dashboard & Gamification",               "totalMin": 24 }
+  },
+  "stepMeta": {
+    "r1": { "subUC": "1.1", "priority": "Hoch",   "owner": "Antoine", "status": "In Bearbeitung", "minutes": 5 },
+    "r2": { "subUC": "1.1", "priority": "Hoch",   "owner": "Antoine", "status": "In Bearbeitung", "minutes": 5 },
+    "r3": { "subUC": "1.2", "priority": "Mittel", "owner": "Antoine", "status": "In Bearbeitung", "minutes": 3 },
+    "r4": { "subUC": "1.2", "priority": "Mittel", "owner": "Antoine", "status": "In Bearbeitung", "minutes": 3 },
+    "r5": { "subUC": "1.3", "priority": "Hoch",   "owner": "Frank",   "status": "In Planung",     "minutes": 6 },
+    "r6": { "subUC": "1.3", "priority": "Hoch",   "owner": "Frank",   "status": "In Planung",     "minutes": 6 },
+
+    "9":  { "subUC": "2.3", "priority": "Mittel", "owner": "Frank",   "status": "In Planung",     "minutes": 3 },
+    "10": { "subUC": "2.1", "priority": "Hoch",   "owner": "Frank",   "status": "Abgeschlossen",  "minutes": 7 },
+    "11": { "subUC": "2.2", "priority": "Hoch",   "owner": "Frank",   "status": "In Bearbeitung", "minutes": 10 },
+    "a1": { "subUC": "2.x", "priority": "Mittel", "owner": "Frank",   "status": "In Bearbeitung", "minutes": 5 },
+    "12": { "subUC": "2.4", "priority": "Hoch",   "owner": "Frank",   "status": "Abgeschlossen",  "minutes": 8 },
+    "13": { "subUC": "2.4", "priority": "Hoch",   "owner": "Frank",   "status": "Abgeschlossen",  "minutes": 8 },
+
+    "14": { "subUC": "3.1", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 4 },
+    "15": { "subUC": "3.2", "priority": "Mittel", "owner": "Antoine", "status": "In Bearbeitung", "minutes": 3 },
+    "v1": { "subUC": "3.x", "priority": "Mittel", "owner": "Frank",   "status": "In Bearbeitung", "minutes": 4 },
+
+    "1":  { "subUC": "4.1", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 5 },
+    "l1": { "subUC": "4.1", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 5 },
+    "2":  { "subUC": "4.1", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 5 },
+    "3":  { "subUC": "4.1", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 5 },
+    "b1": { "subUC": "4.1", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 5 },
+    "4":  { "subUC": "4.1", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 5 },
+    "5":  { "subUC": "4.2", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 6 },
+    "6":  { "subUC": "4.2", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 6 },
+    "w1": { "subUC": "4.2", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 6 },
+    "7":  { "subUC": "4.2", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 6 },
+    "8":  { "subUC": "4.2", "priority": "Hoch",   "owner": "Antoine", "status": "Abgeschlossen",  "minutes": 6 },
+
+    "d1": { "subUC": "5.1", "priority": "Hoch",   "owner": "Frank",   "status": "In Bearbeitung", "minutes": 5 },
+    "k1": { "subUC": "5.2", "priority": "Hoch",   "owner": "Frank",   "status": "In Bearbeitung", "minutes": 7 },
+    "s1": { "subUC": "5.5", "priority": "Mittel", "owner": "Frank",   "status": "In Bearbeitung", "minutes": 5 },
+    "16": { "subUC": "5.4", "priority": "Mittel", "owner": "Frank",   "status": "In Bearbeitung", "minutes": 3 },
+    "17": { "subUC": "5.5", "priority": "Mittel", "owner": "Frank",   "status": "In Bearbeitung", "minutes": 5 }
+  }
+}
