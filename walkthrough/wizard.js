@@ -27,11 +27,38 @@
   // their order in upstream DEMO-FLOW.md. Set to null to fall back to
   // dynamic parsing of the document's `## ` H2 headings.
   const WALKTHROUGH_STRUCTURE = [
-    { label: '1. Nutzerverwaltung — Rollen & Profile', stepIds: [] },
-    { label: '2. Erstellung & Publikation',            stepIds: ['9', '10', '11', '12', '13'] },
-    { label: '3. Verwaltung bestehender Angebote',     stepIds: ['14', '15'] },
-    { label: '4. Anmeldeprozess',                      stepIds: ['1', '2', '3', '4', '5', '6', '7', '8'] },
-    { label: '5. Dashboard & Gamification',            stepIds: ['16', '17'] },
+    { label: '1. Nutzerverwaltung — Rollen & Profile', stepIds: ['r1','r2','r3','r4','r5','r6'] },
+    { label: '2. Erstellung & Publikation',            stepIds: ['9','10','11','a1','12','13'] },
+    { label: '3. Verwaltung bestehender Angebote',     stepIds: ['14','15','v1'] },
+    { label: '4. Anmeldeprozess',                      stepIds: ['1','l1','2','3','b1','4','5','6','w1','7','8'] },
+    { label: '5. Dashboard & Gamification',            stepIds: ['d1','k1','s1','16','17'] },
+  ];
+
+  // Overlay-defined extras — pages that exist upstream but are not
+  // (yet) referenced in DEMO-FLOW.md. Rendered with title + file link
+  // and a "noch nicht in DEMO-FLOW.md dokumentiert" note; no chips,
+  // no narration sections. When upstream adds them to DEMO-FLOW.md,
+  // delete the entry here and use the real step ID in WALKTHROUGH_STRUCTURE.
+  const EXTRA_STEPS = [
+    // 1. Nutzerverwaltung
+    { id: 'r1', title: 'Rollen & Berechtigungen',           files: ['rollen-berechtigungen.html'] },
+    { id: 'r2', title: 'Rolle bearbeiten',                  files: ['rolle-bearbeiten.html'] },
+    { id: 'r3', title: 'Nutzerübersicht',                   files: ['nutzeruebersicht.html'] },
+    { id: 'r4', title: 'Nutzerprofil Detail (Doppelrolle)', files: ['nutzerprofil-detail.html'] },
+    { id: 'r5', title: 'Nutzer anlegen — intern',           files: ['nutzer-anlegen-intern.html'] },
+    { id: 'r6', title: 'Nutzer anlegen — extern',           files: ['nutzer-anlegen-extern.html'] },
+    // 2. Erstellung
+    { id: 'a1', title: 'Angebot bearbeiten',                files: ['angebot-bearbeiten.html'] },
+    // 3. Verwaltung
+    { id: 'v1', title: 'Auswertungen',                      files: ['auswertungen.html'] },
+    // 4. Anmeldeprozess
+    { id: 'l1', title: 'Lernplatz — extern',                files: ['lernplatz-extern.html'] },
+    { id: 'b1', title: 'Meine Buchungen',                   files: ['meine-buchungen.html'] },
+    { id: 'w1', title: 'Webshop · 2FA-Setup',               files: ['webshop-2fa-setup.html'] },
+    // 5. Dashboard & Gamification — fills former roadmap-only slot
+    { id: 'd1', title: 'Manager-Dashboard',                 files: ['manager-dashboard.html'] },
+    { id: 'k1', title: 'Kompetenzen & Lernpfade',           files: ['kompetenzen.html'] },
+    { id: 's1', title: 'Social Wall',                       files: ['social-wall.html'] },
   ];
 
   const META_LABELS = new Set(['Persona', 'Award lens']);
@@ -331,6 +358,19 @@
   }
 
   function renderStepBody(step) {
+    if (step.isExtra) {
+      const file = step.files[0] || '';
+      return `
+        <div class="wiz-narration">
+          ${renderFileRow(step)}
+          <p style="margin-top:8px;color:var(--wiz-text-soft);font-size:12.5px;">
+            Diese Seite ist im Prototyp neu und noch nicht in
+            <code>DEMO-FLOW.md</code> dokumentiert.
+            ${file ? `Direkt öffnen: <a href="/${esc(file)}"><code>${esc(file)}</code></a>` : ''}
+          </p>
+        </div>
+      `;
+    }
     return `
       <div class="wiz-narration">
         ${renderChips(step)}
@@ -546,22 +586,38 @@
     const parsed = parseDemoFlow(md);
     if (!parsed.steps.length) return;
 
+    // Merge overlay-defined EXTRA_STEPS so the WALKTHROUGH_STRUCTURE
+    // reorder loop below can pick them up alongside real DEMO-FLOW.md
+    // steps. Synthetic entries get `isExtra: true` so renderStepBody
+    // can render a placeholder instead of expecting sections/chips.
+    const allSteps = [
+      ...parsed.steps,
+      ...EXTRA_STEPS.map(e => ({
+        id: e.id,
+        title: e.title,
+        files: e.files || [],
+        sections: [],
+        isRoadmap: false,
+        isExtra: true,
+      })),
+    ];
+
     if (WALKTHROUGH_STRUCTURE) {
       state.groups = WALKTHROUGH_STRUCTURE;
       const seen = new Set();
       const ordered = [];
       for (const g of WALKTHROUGH_STRUCTURE) {
         for (const id of g.stepIds) {
-          const s = parsed.steps.find(x => x.id === id);
+          const s = allSteps.find(x => x.id === id);
           if (s && !seen.has(s.id)) { ordered.push(s); seen.add(s.id); }
         }
       }
-      for (const s of parsed.steps) {
+      for (const s of allSteps) {
         if (!seen.has(s.id)) { ordered.push(s); seen.add(s.id); }
       }
       state.steps = ordered;
     } else {
-      state.steps = parsed.steps;
+      state.steps = allSteps;
       state.groups = parsed.groups;
     }
 
