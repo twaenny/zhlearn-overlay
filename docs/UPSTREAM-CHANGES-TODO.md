@@ -1,4 +1,11 @@
-# ZHlearn Upstream — Demo-Prep Changes (Stand 2026-05-27)
+# ZHlearn Upstream — Demo-Prep Changes (Stand 2026-05-28)
+
+## ✅ ERLEDIGT 2026-05-28
+
+- **Revert `8f67ca1`** (commit `1d1b961`, gepusht direkt auf main): Codex hat in PR #64 die ganze `nutzeruebersicht.html` mit dem Literal `@nutzeruebersicht.html` überschrieben (-1378 Zeilen, +2 Garbage). Hub-Stand aus `77821a5` wiederhergestellt. Frank muss seine „add external user creation context"-Absicht in einem neuen sauberen PR re-implementieren.
+
+---
+
 
 **Quelle**: ZK09-Bid-Audit + Demo-Plan-PDF + Strict-Reading des Pflichtenhefts §3, durchgeführt im Overlay-Repo `twaenny/zhlearn-overlay`.
 

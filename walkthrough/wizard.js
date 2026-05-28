@@ -27,7 +27,7 @@
   // their order in upstream DEMO-FLOW.md. Set to null to fall back to
   // dynamic parsing of the document's `## ` H2 headings.
   const WALKTHROUGH_STRUCTURE = [
-    { label: '1. Nutzerverwaltung — Rollen & Profile', stepIds: ['r1','r2','r3','r4','r5','r6'] },
+    { label: '1. Nutzerverwaltung — Hub + Doppelrolle', stepIds: ['r3','r4'] },
     { label: '2. Erstellung & Publikation',            stepIds: ['9','10','11','a1','12','13'] },
     { label: '3. Verwaltung bestehender Angebote',     stepIds: ['14','15','v1'] },
     { label: '4. Anmeldeprozess',                      stepIds: ['1','l1','2','3','b1','4','5','6','w1','7','8'] },

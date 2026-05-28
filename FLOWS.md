@@ -117,7 +117,7 @@ Weitere Pages mit vielen Dead-Clicks:
 - `nutzer-anlegen-extern.html`: 6
 
 ### 2. Fehlende Inter-Page-Bridges (Wizard-Dropdown muss überbrücken)
-- 1.2 → 1.3: `nutzerprofil-detail` → `nutzer-anlegen-intern` (🔁)
+- 1.2 → Hub: `nutzerprofil-detail` → back zu `nutzeruebersicht` (via Wizard, seit Konsolidierung 2026-05-28)
 - 2.4 → 3.1: `freigabeprozess` → `teilnehmerliste-angebot` (🔁)
 - 4.1 → 4.2: irgendein internal-Page → `webshop-katalog` (🔁)
 - 5.2 → 5.3: `kompetenzen` → `social-wall` (🔁)
@@ -163,12 +163,12 @@ wir bauen werden" einstreuen**, nicht explizit demonstrieren.
 
 | Page | Bid-Use-Case | Wizard-Step | Coverage |
 |---|---|---|---|
-| `rollen-berechtigungen.html` 🆕 | 1.1 | r1 | ✅ |
-| `rolle-bearbeiten.html` | 1.1 | r2 | ✅ |
-| `nutzeruebersicht.html` | 1.2 | r3 | ✅ |
-| `nutzerprofil-detail.html` | 1.2 (Doppelrolle) | r4 | ✅ |
-| `nutzer-anlegen-intern.html` | 1.3 | r5 | ✅ |
-| `nutzer-anlegen-extern.html` | 1.3 | r6 | ✅ |
+| `nutzeruebersicht.html` 🆕 (Hub) | **1.1 + 1.3** (konsolidiert) | r3 | ✅ |
+| `nutzerprofil-detail.html` | 1.2 (Doppelrolle, Climax) | r4 | ✅ |
+| `rollen-berechtigungen.html` | (Drill-Down) | – | – |
+| `rolle-bearbeiten.html` | (Drill-Down) | – | – |
+| `nutzer-anlegen-intern.html` | (Drill-Down) | – | – |
+| `nutzer-anlegen-extern.html` | (Drill-Down) | – | – |
 | `vorlagen-uebersicht.html` | 2.1 | Step 10 (tab #2) | ✅ |
 | `vorlage-bearbeiten.html` | 2.1 | – (Drill-Down) | ✅ |
 | `angebot-erstellen-einstieg.html` | 2.x (Entry) | Step 10 (tab #1) | ✅ |

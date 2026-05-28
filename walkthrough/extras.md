@@ -12,97 +12,88 @@ Quellen für Inhalte + Demo-Metadaten:
 
 ---
 
-## 1 · Use Case 1 · Nutzerverwaltung (14 min)
+## 1 · Use Case 1 · Nutzerverwaltung (8 min, 2 Screens)
 
-### Step r1 · `rollen-berechtigungen.html` — Rollen & Berechtigungen
+Frank hat den ganzen Block 1 auf zwei Surfaces konsolidiert:
+- **r3 = Nutzerverwaltungs-Hub** — Liste + In-Page-Trigger für
+  Rollen/Rechte + Nutzeranlage intern + Nutzeranlage extern.
+  Deckt UC 1.1 + UC 1.3 ab.
+- **r4 = Nutzerprofil Detail** — bleibt der UC-1.2-Climax (Doppelrolle
+  + Mehrfachanstellung).
+
+Die Drill-Down-Pages `rollen-berechtigungen.html`, `rolle-bearbeiten.html`,
+`nutzer-anlegen-intern.html`, `nutzer-anlegen-extern.html` existieren
+upstream weiter und sind via In-Page-Trigger erreichbar — aber im
+Wizard-Hauptpfad zeigen wir nur die zwei Hub-Screens.
+
+### Step r3 · `nutzeruebersicht.html` — Nutzerverwaltungs-Hub (UC 1.1 + 1.3)
 
 **Persona** · Silvia Keller (Admin)
-**Award lens** · Governance · Sicherheit
+**Award lens** · Discoverability · Governance · Konsolidierung
 
 **What you're looking at**
 
-Die zentrale Rollen-Matrix für ZHlearn-Admins. Jede Zeile ist eine
-Rolle, jede Spalte eine Berechtigung; rechts der Scope-Editor für
-Direktion / Amt. Upstream wurde diese Surface diese Woche stark
-überarbeitet (Matrix-View, Tile-Grid, Multi-Direktion-Scope).
+Der zentrale Hub für die ganze Nutzerverwaltung: Cross-Direktion-
+Liste mit Filter + Schnell-Aktionen + Markierungen für Mehrfach-
+anstellung. Plus drei In-Page-Trigger:
+
+- **„Rollen & Rechte"** (`data-roles-rights-trigger`) öffnet den
+  In-Page-Roles-Rights-Context — Matrix-View aus `rollen-berechtigungen`
+  als Drawer / Overlay statt eigener Page (Bid §3 UC 1.1)
+- **„Nutzer anlegen — intern"** (`data-create-user-trigger`) öffnet
+  inline SSO-Lookup + Form (Bid §3 UC 1.3, IAMZH-Anbindung)
+- **„Nutzer anlegen — extern"** (separater Trigger) öffnet inline
+  E-Mail-Verifikation + 2FA-Setup-Hinweis (Bid §3 UC 1.3, ZK06)
+
+Alle drei Aktionen ohne Page-Wechsel — Silvia bleibt im Kontext der
+Liste. Das ist der Unterschied zum Standard-LMS, wo jede Aktion eine
+eigene Surface ist.
 
 **Notable interactions**
 
-- Zwischen Matrix- und Tile-View umschalten (rechts oben)
-- Multi-Direktion-Scope für eine Rolle setzen — zeigt, wie zwei
-  Direktionen parallel zugewiesen werden können
-- Permission „Leaderboards anzeigen / steuern" hervorheben — schafft
-  Bezug zu Bid 5.4 (Gamification)
-
-**Design choices to evaluate**
-
-- Reicht die Matrix für 60+ Rollen, oder braucht es Suche / Gruppierung?
-- Scope-Editor inline vs. Modal — welche Variante ist klarer?
-
-**Known limitations**
-
-- Rollen-Workflow-Spec (`WALKTHROUGH-ROUTES-ROLLEN.md`) noch nicht
-  als geführte Schritt-für-Schritt-Tour adoptiert.
-
-### Step r2 · `rolle-bearbeiten.html` — Rolle bearbeiten
-
-**Persona** · Silvia Keller (Admin)
-**Award lens** · Governance
-
-**What you're looking at**
-
-Detail-Editor einer einzelnen Rolle: Berechtigungsblöcke, Scope-Setup,
-Audit-Log-Vorschau.
-
-**Notable interactions**
-
-- Berechtigung an/abhaken — sofortige Konsequenz im Permission-Tree
-- Direktion + Amt als Scope kombinieren
-
-**Design choices to evaluate**
-
-- Speichern-Modal vs. Inline-Save — Reviewer-Präferenz erfragen.
-
-### Step r3 · `nutzeruebersicht.html` — Nutzerübersicht
-
-**Persona** · Silvia Keller (Admin)
-**Award lens** · Discoverability · Effizienz
-
-**What you're looking at**
-
-Cross-Direktion-Liste aller Nutzer mit Filter, Schnell-Aktionen und
-Markierungen für Mehrfachanstellung / Doppelrolle.
-
-**Notable interactions**
-
-- Filter nach Direktion / Rolle / Status
-- „Schnellzuweisung"-Toolbar auf Selection (Vorbereitung für Route A
-  aus `WALKTHROUGH-ROUTES-ROLLEN.md`)
+- Filter nach Direktion / Rolle / Status / Anstellung
+- Multi-Select → bulk-Toolbar erscheint inline (Vorbereitung für
+  Route A aus `WALKTHROUGH-ROUTES-ROLLEN.md`)
 - Tag-Chip „Mehrfachanstellung · 2 Direktionen" auf einem Nutzer
-  klicken → springt zur Detail-Page
+  klicken → springt zur Detail-Page (r4)
+- „Rollen & Rechte"-Button rechts oben → Matrix-Context als Overlay
+- „+ Nutzer (intern)" → SSO-Lookup-Form inline
+- „+ Nutzer (extern)" → Verifikations-Form inline mit Patenschafts-
+  Auswahl (Admin · Staatskanzlei als Default-Approver)
 
 **Design choices to evaluate**
 
-- Bulk-Edit für 50+ Nutzer — Performance + UI-Pattern.
+- Konsolidierung 4-in-1 vs. eigene Pages — reduziert Klick-Tiefe
+  drastisch, aber wird der Hub-Screen zu voll bei 60+ Rollen?
+- In-Page-Trigger vs. Modal — Reviewer-Präferenz erfragen.
+- Permission „Leaderboards anzeigen / steuern" hervorheben — schafft
+  Bezug zu Bid §3 UC 5.4 (Gamification).
 
 **Known limitations**
 
+- Bulk-Toolbar-Spec aus `WALKTHROUGH-ROUTES-ROLLEN.md` noch nicht
+  als geführte Tour adoptiert.
 - Sortier-Verhalten bei sehr großen Listen noch nicht final.
 
-### Step r4 · `nutzerprofil-detail.html` — Nutzerprofil Detail (Doppelrolle)
+### Step r4 · `nutzerprofil-detail.html` — Doppelrolle + Mehrfachanstellung (UC 1.2 · DEMO-CLIMAX)
 
 **Persona** · Silvia Keller (Admin)
-**Award lens** · Sicherheit · Nachvollziehbarkeit
+**Award lens** · Sicherheit · Nachvollziehbarkeit · KTZH-Differenzierung
 
 **What you're looking at**
 
 Detail einer Person mit zwei aktiven Anstellungen + Doppelrolle.
 Sichtbar: Chip „Mehrfachanstellung · 2 Direktionen", Hinweis
-„Doppelrolle erkannt" / „Doppelrolle bestätigt".
+„Doppelrolle erkannt" / „Doppelrolle bestätigt", Context-Cards pro
+Anstellung mit eigenem Rollen-Set, OE, Pflicht-Status.
+
+Das ist die wichtigste Differenzierungs-Surface der ganzen Demo —
+ein Standard-LMS scheitert genau hier.
 
 **Notable interactions**
 
 - Tab zwischen Direktion-A-Rollen und Direktion-B-Rollen
+- „User-Sicht einnehmen"-Quick-Action (Bid §2.4 Rollenwechsel)
 - Doppelrolle „bestätigen" → wechselt von erkannt zu bestätigt und
   schreibt ins Audit-Log
 
@@ -114,45 +105,6 @@ Sichtbar: Chip „Mehrfachanstellung · 2 Direktionen", Hinweis
 **Known limitations**
 
 - Audit-Log heute nur Mockup, kein echter Datenfluss.
-
-### Step r5 · `nutzer-anlegen-intern.html` — Nutzer anlegen (intern)
-
-**Persona** · Silvia Keller (Admin)
-**Award lens** · Onboarding · SSO
-
-**What you're looking at**
-
-Formular für interne KTZH-User. SSO-Lookup nach E-Mail / AD-Konto;
-automatische Vorbefüllung von Direktion und Initial-Rolle.
-
-**Notable interactions**
-
-- SSO-Konto suchen → Felder werden ausgefüllt
-- Rolle aus Vorschlagsliste auswählen (Default-Rollen pro Direktion)
-
-**Design choices to evaluate**
-
-- Soll Initial-Rolle „Standard-Lerner" automatisch gesetzt werden?
-
-### Step r6 · `nutzer-anlegen-extern.html` — Nutzer anlegen (extern)
-
-**Persona** · Silvia Keller (Admin)
-**Award lens** · Onboarding · Externe Zielgruppen
-
-**What you're looking at**
-
-Formular für externe Nutzer (Lehrkräfte anderer Kantone, freie
-Mitarbeitende). Manuelle Eingabe + E-Mail-Verifikation + 2FA-Hinweis.
-
-**Notable interactions**
-
-- E-Mail-Eingabe triggert Verifikations-Mail-Vorschau
-- 2FA-Setup-Hinweis erscheint nach Eingabe der Telefonnummer
-
-**Design choices to evaluate**
-
-- Selbstregistrierung externer vs. Admin-Anlage — welche ist der
-  primäre Pfad für die ZK09-Demo?
 
 ---
 

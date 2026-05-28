@@ -173,19 +173,15 @@
     const USE_CASES = [
       {
         num: '1', title: 'Nutzerverwaltung',
-        sub: 'Bid §3 — Rollen, Berechtigungen, Profile (intern + extern)',
+        sub: 'Bid §3 — Rollen, Berechtigungen, Profile (intern + extern) — auf 2 Screens konsolidiert',
         bullets: [
-          { title: '1.1 Verwaltung von Rollen und Berechtigungen', cards: [
-            { title: 'Rollen & Berechtigungen', file: 'rollen-berechtigungen.html', wiz: true, step: 'r1', note: 'Matrix-Editor + Multi-Direktion-Scope (überarbeitet 2026-05-27)' },
-            { title: 'Rolle bearbeiten', file: 'rolle-bearbeiten.html', wiz: true, step: 'r2' },
+          { title: '1.1 + 1.3 Rollen, Berechtigungen + Nutzeranlage (Hub-Screen)', cards: [
+            { title: 'Nutzerverwaltungs-Hub', file: 'nutzeruebersicht.html', wiz: true, step: 'r3',
+              note: 'Konsolidierter Hub: Liste + In-Page-Trigger für Roles/Rights + Create intern + Create extern (Frank 2026-05-28)' },
           ]},
-          { title: '1.2 Anzeige Doppelrollen / Mehrfachanstellung', cards: [
-            { title: 'Nutzerübersicht', file: 'nutzeruebersicht.html', wiz: true, step: 'r3' },
-            { title: 'Nutzerprofil Detail', file: 'nutzerprofil-detail.html', wiz: true, step: 'r4', note: 'Zeigt Doppelrolle + Mehrfachanstellung (Demo-Climax)' },
-          ]},
-          { title: '1.3 Erstellung von Nutzerprofilen (intern + extern)', cards: [
-            { title: 'Nutzer anlegen — intern', file: 'nutzer-anlegen-intern.html', wiz: true, step: 'r5', note: 'SSO-Lookup via IAMZH' },
-            { title: 'Nutzer anlegen — extern', file: 'nutzer-anlegen-extern.html', wiz: true, step: 'r6', note: 'E-Mail-Verifikation + 2FA per ZK06' },
+          { title: '1.2 Anzeige Doppelrollen / Mehrfachanstellung (Demo-Climax)', cards: [
+            { title: 'Nutzerprofil Detail', file: 'nutzerprofil-detail.html', wiz: true, step: 'r4',
+              note: '„Mehrfachanstellung · 2 Direktionen" Chip + „Doppelrolle erkannt" Banner + Context-Cards' },
           ]},
         ],
       },

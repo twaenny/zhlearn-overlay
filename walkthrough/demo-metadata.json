@@ -1,19 +1,15 @@
 {
   "_doc": "PDF demo-plan metadata + audit-driven coverage flags, applied at render time to wizard steps by ID. Source: docs/2026-05-27_ZK09-Demo-Plan-Status.pdf (Stand 2026-05-27) + ZK09-Audit 2026-05-27.",
   "useCases": {
-    "1": { "title": "Nutzerverwaltung",                "totalMin": 14, "coverage": "ok"      },
+    "1": { "title": "Nutzerverwaltung",                "totalMin":  8, "coverage": "ok"      },
     "2": { "title": "Erstellung & Publikation",        "totalMin": 28, "coverage": "ok"      },
     "3": { "title": "Verwaltung bestehender Angebote", "totalMin":  7, "coverage": "partial" },
     "4": { "title": "Anmeldeprozess",                  "totalMin": 15, "coverage": "ok"      },
     "5": { "title": "Dashboard & Gamification",        "totalMin": 24, "coverage": "partial" }
   },
   "stepMeta": {
-    "r1": { "subUC": "1.1", "priority": "Hoch",   "status": "In Bearbeitung", "minutes": 5, "coverage": "ok" },
-    "r2": { "subUC": "1.1", "priority": "Hoch",   "status": "In Bearbeitung", "minutes": 5, "coverage": "ok" },
-    "r3": { "subUC": "1.2", "priority": "Mittel", "status": "In Bearbeitung", "minutes": 3, "coverage": "ok" },
-    "r4": { "subUC": "1.2", "priority": "Mittel", "status": "In Bearbeitung", "minutes": 3, "coverage": "ok" },
-    "r5": { "subUC": "1.3", "priority": "Hoch",   "status": "In Planung",     "minutes": 6, "coverage": "ok" },
-    "r6": { "subUC": "1.3", "priority": "Hoch",   "status": "In Planung",     "minutes": 6, "coverage": "ok" },
+    "r3": { "subUC": "1.1+1.3", "priority": "Hoch",   "status": "In Bearbeitung", "minutes": 5, "coverage": "ok" },
+    "r4": { "subUC": "1.2",     "priority": "Hoch",   "status": "In Bearbeitung", "minutes": 3, "coverage": "ok" },
 
     "9":  { "subUC": "2.3", "priority": "Mittel", "status": "In Planung",     "minutes": 3,  "coverage": "ok" },
     "10": { "subUC": "2.1", "priority": "Hoch",   "status": "Abgeschlossen",  "minutes": 7,  "coverage": "ok" },

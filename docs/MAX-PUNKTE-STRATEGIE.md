@@ -20,19 +20,22 @@ Wo verdienen wir Punkte, wo verlieren wir sie, was tun bis 2026-05-31.
 
 **Sub-Points**: 1.1 Rollen+Berechtigungen · 1.2 Doppelrollen/Mehrfachanstellung · 1.3 Profil-Erstellung intern+extern
 
-**Gewicht**: keines direkt — aber **1.2 ist unser stärkstes KTZH-Differenzierungs-Argument** und sollte als Demo-Climax inszeniert werden.
+**Konsolidiert seit 2026-05-28**: alle 3 Sub-Points auf **2 Screens** (statt 6) — Frank's Hub-Refactor auf `nutzeruebersicht.html` + Detail-Climax auf `nutzerprofil-detail.html`.
+
+**Gewicht**: keines direkt — aber **1.2 ist unser stärkstes KTZH-Differenzierungs-Argument** und sollte als Demo-Climax inszeniert werden. Block-Total: **8 min** (statt vorher 14).
 
 ### Max-Punkte-Actions
 
-| Sub-Point | Was zeigt Max-Punkte | Status | Action bis Freitag |
+| Sub-Point | Screen | Was zeigt Max-Punkte | Status |
 |---|---|---|---|
-| 1.1 | Matrix sichtbar + „Rollen systemseitig fix"-Banner + Multi-Direktion-Scope-Editor + Audit-Trail-Hint | ✅ ready | — |
-| **1.2** | **„Mehrfachanstellung · 2 Direktionen"-Chip + „Doppelrolle erkannt"-Banner + Context-Cards pro Anstellung + „User-Sicht einnehmen"-Action** | ✅ ready | Optional: zweiten Doppelrolle-Nutzer in Demo-Datensatz (~30 min) |
-| 1.3 | Intern: SSO-Lookup → Auto-Felder · Extern: E-Mail-Verifikation + 2FA-Hinweis | ✅ ready | — |
+| 1.1 + 1.3 | **r3** Hub | Matrix-Overlay + Multi-Direktion-Scope + In-Page-Trigger für intern + extern Nutzeranlage — alles ohne Page-Wechsel | ✅ ready |
+| **1.2** | **r4** Detail | **„Mehrfachanstellung · 2 Direktionen"-Chip + „Doppelrolle erkannt"-Banner + Context-Cards pro Anstellung + „User-Sicht einnehmen"-Action** | ✅ ready |
 
-**Max-Punkte-Verbal**: *„Hier scheitert ein Standard-LMS. Eine Person, mehrere Direktionen, mehrere Rollen — getrennt modelliert, nicht in eine Hauptrolle gezwungen. Genau die KTZH-Realität."*
+**Max-Punkte-Verbal Hub (r3)**: *„Ein Standard-LMS hat für jeden Aspekt eine eigene Page — wir konsolidieren Rollen-Matrix, Nutzeranlage intern + extern auf einen Hub. Silvia bleibt im Kontext der Liste, wechselt nicht durch 4 Surfaces."*
 
-**Risiko**: keine offenen Lücken. Reviewer könnte fragen warum r1–r6 IDs (statt 1, 2, …) — Antwort: „die echten DEMO-FLOW.md Steps sind 1–17, unsere Erweiterung beginnt mit r/d/k/s-Präfixen."
+**Max-Punkte-Verbal Climax (r4)**: *„Hier scheitert ein Standard-LMS. Eine Person, mehrere Direktionen, mehrere Rollen — getrennt modelliert, nicht in eine Hauptrolle gezwungen. Genau die KTZH-Realität."*
+
+**Risiko**: keine offenen Lücken nach Frank's Hub-Konsolidierung. Wenn ein Reviewer nach Details fragt (z.B. „wo ist die Detail-Page für eine Rolle?") — Antwort: „im Drill-Down-Pfad, demonstrierbar via direkter URL — heute Demo zeigt den Hub-First-Pfad."
 
 📖 **Details pro Sub-Point**: [`docs/scripts/1.1`](scripts/1.1-rollen-berechtigungen.md), [`1.2`](scripts/1.2-doppelrollen.md), [`1.3`](scripts/1.3-nutzer-anlegen.md)
 
